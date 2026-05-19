@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout(~{::#page-content}, 'Gestión de Equipos')}">
+<body>
+
+<div id="page-content" th:fragment="content">
+    
+    <div class="container-fluid p-0">
+        <div class="page-header fade-up mb-4">
+            <h1 class="page-title">Gestión de Equipos</h1>
+            <p class="page-subtitle">Configura las sucursales, turnos o sectores apartados de trabajo</p>
+        </div>
+
+        <div class="card-dark mb-4 fade-up fade-up-1">
+            <div class="card-header-dark">
+                <span class="card-title-dark">
+                    <i class="bi bi-plus-circle me-2" style="color:var(--accent)"></i>Crear Nuevo Equipo / Turno
+                </span>
+            </div>
+            <div class="card-body-dark">
+                <form th:action="@{/teams/guardar}" th:object="${nuevoEquipo}" method="post" class="form-dark m-0">
+                    <div class="row g-3">
+                        <div class="col-12 col-md-5">
+                            <label for="name" class="form-label" style="color: var(--text-secondary);">Nombre del Equipo</label>
+                            <input type="text" th:field="*{name}" id="name" class="form-control" placeholder="Ej: Sucursal Macul - Mañana" required/>
+                        </div>
+                        <div class="col-12 col-md-7">
+                            <label for="description" class="form-label" style="color: var(--text-secondary);">Descripción / Notas</label>
+                            <input type="text" th:field="*{description}" id="description" class="form-control" placeholder="Ej: Personal del primer turno de producción"/>
+                        </div>
+                        
+                        <div class="col-12 col-md-10 mt-3">
+                            <label class="form-label" style="color: var(--text-secondary);">Áreas operativas del equipo:</label>
+                            <div class="row g-2 mt-1">
+                                <div class="col-12 col-sm-6 col-md-4" th:each="area : ${todasLasAreas}">
+                                    <label class="d-flex align-items-center p-2 w-100" style="background: rgba(0,0,0,0.2); border-radius: 8px; border: 1px solid var(--border); cursor: pointer; gap: 10px;">
+                                        <input class="form-check-input m-0 flex-shrink-0" type="checkbox" name="areasIds" th:value="${area.id}">
+                                        <span th:text="${area.nombre}" style="color: var(--text-primary); font-size: 13.5px; user-select: none;"></span>
+                                    </label>
+                                </div>
+                                <div class="col-12" th:if="${#lists.isEmpty(todasLasAreas)}">
+                                    <span style="color: var(--text-muted); font-size: 0.9rem;">No hay áreas creadas en el sistema.</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-md-2 d-flex align-items-end mt-3 mt-md-0">
+                            <button type="submit" class="btn-primary-dark w-100 justify-content-center" style="height: 38px;">
+                                <i class="bi bi-save me-1"></i> Guardar
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="card-dark fade-up fade-up-2">
+            <div class="card-header-dark">
+                <span class="card-title-dark">
+                    <i class="bi bi-building me-2" style="color:var(--accent)"></i>Unidades y Sucursales Registradas
+                </span>
+            </div>
+            
+            <div th:if="${#lists.isEmpty(equipos)}" class="empty-state">
+                <i class="bi bi-people" style="font-size: 2.5rem; margin-bottom: 10px;"></i>
+                <p>No hay equipos creados todavía. Usa el formulario de arriba para añadir el primero.</p>
+            </div>
+
+            <div class="table-responsive" th:unless="${#lists.isEmpty(equipos)}">
+<table class="table-dark-custom mb-0">
+                <thead>
+                    <tr>
+                        <th class="text-center">ID</th>
+                        <th class="text-center">Nombre del Equipo / Turno</th>
+                        <th class="text-center">Áreas</th>
+                        <th class="text-center">Descripción</th>
+                        <th class="text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="e : ${equipos}">
+                        <td data-label="ID" style="color:var(--text-muted); font-family:var(--font-mono)" th:text="'#' + ${e.id}"></td>
+                        
+                        <td data-label="Equipo" th:text="${e.name}" style="font-weight: 600; color: var(--text-primary);"></td>
+                        
+                        <td data-label="Áreas" style="color:var(--text-secondary)">
+                            <span th:if="${#lists.isEmpty(e.areas)}">-</span>
+                            <span th:unless="${#lists.isEmpty(e.areas)}" 
+                                  th:each="a, iterStat : ${e.areas}" 
+                                  th:text="${a.nombre} + ${!iterStat.last ? ', ' : ''}">
+                            </span>
+                        </td>
+                        
+                        <td data-label="Descripción" th:text="${e.description != null && !e.description.isEmpty() ? e.description : '-'}" style="color:var(--text-secondary)"></td>
+                        
+                        <td data-label="Acciones" style="display: flex; gap: 8px;">
+                            <a th:href="@{/teams/editar/{id}(id=${e.id})}" class="btn-ghost w-100 justify-content-center" style="color: var(--accent); padding: 8px;" title="Configurar Equipo">
+                                <i class="bi bi-pencil-square"></i>
+                            </a>
+                            <a th:href="@{/teams/eliminar/{id}(id=${e.id})}" class="btn-danger-ghost w-100 justify-content-center" style="padding: 8px;"
+                               onclick="return confirm('¿Estás seguro?')" title="Eliminar Equipo">
+                                <i class="bi bi-trash"></i>
+                            </a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>

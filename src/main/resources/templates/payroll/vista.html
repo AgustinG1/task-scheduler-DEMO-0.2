@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout(~{::#page-content}, 'Planilla de Turnos')}">
+<body>
+
+<div id="page-content" th:fragment="content">
+    
+    <div class="container-fluid p-0">
+        
+        <div class="page-header fade-up mb-4">
+            <h1 class="page-title">Planilla de Turnos</h1>
+            <p class="page-subtitle">Matriz de asignación semanal generada por equipo</p>
+        </div>
+
+        <div class="card-dark mb-4 fade-up fade-up-1">
+            <div class="card-body-dark d-flex align-items-center justify-content-between flex-wrap gap-3">
+                
+                <form th:action="@{/payroll/generar}" method="post" class="form-dark d-flex align-items-center gap-3 m-0">
+                    
+                    <label class="form-label m-0">Generar para Sucursal:</label>
+                    <select name="teamId" class="form-control" style="width: 250px;" required>
+                        <option value="" disabled selected>Selecciona un equipo...</option>
+                        <option th:each="equipo : ${todosLosEquipos}" th:value="${equipo.id}" th:text="${equipo.name}"></option>
+                    </select>
+
+                    <label class="form-label m-0 ms-2" style="white-space: nowrap;">Duración:</label>
+                    <input type="number" name="semanas" value="16" min="1" max="52" class="form-control" style="width: 80px;"/>
+                    <span class="form-label m-0">semanas</span>
+                    
+                    <button type="submit" class="btn-primary-dark ms-3">
+                        <i class="bi bi-magic me-1"></i> Ejecutar Motor
+                    </button>
+                </form>
+
+                <div th:if="${planilla != null}" class="d-flex gap-2">
+                    <span class="badge-general"><i class="bi bi-calendar-event me-1"></i> Inicio: <span th:text="${planilla.startDate}"></span></span>
+                    <span class="badge-general"><i class="bi bi-calendar-check me-1"></i> Fin: <span th:text="${planilla.endDate}"></span></span>
+                </div>
+            </div>
+        </div>
+
+        <div th:if="${planilla == null}" class="card-dark fade-up fade-up-2">
+            <div class="empty-state">
+                <i class="bi bi-calendar-x" style="font-size: 3rem; margin-bottom: 15px;"></i>
+                <p>No hay ninguna planilla activa. Selecciona un equipo, define las semanas y ejecuta el motor.</p>
+            </div>
+        </div>
+
+        <div th:if="${planilla != null}" class="card-dark fade-up fade-up-2">
+            <div class="card-header-dark" style="display: flex; justify-content: space-between; align-items: center;">
+                <span class="card-title-dark">
+                    <i class="bi bi-grid-3x3 me-2" style="color:var(--accent)"></i>Cuadro de Mando - <span th:text="${equipoActivo != null ? equipoActivo.name : 'General'}"></span>
+                </span>
+                
+                <a th:href="@{/api/payrolls/{id}/download(id=${planilla.id})}" class="btn-ghost" style="padding: 4px 12px; color: #10b981; border-color: rgba(16, 185, 129, 0.2);">
+                    <i class="bi bi-filetype-csv me-1"></i> Descargar CSV
+                </a>
+            </div>
+            
+            <div class="table-responsive" style="max-height: 65vh; overflow: auto; background: var(--bg-card);">
+                <table class="table-dark-custom text-center m-0" style="white-space: nowrap; border-collapse: separate; border-spacing: 0;">
+                    
+                    <thead style="position: sticky; top: 0; z-index: 10;">
+                        <tr>
+                            <th style="background: var(--bg-surface); position: sticky; left: 0; z-index: 11; border-right: 1px solid var(--border);">Semana</th>
+                            
+                            <th th:each="tarea : ${tareas}" th:text="${tarea.name}" style="background: var(--bg-surface); border-left: 1px solid var(--border);"></th>
+                            
+                            <th style="background: rgba(239,68,68,0.1); color: var(--danger); border-left: 1px solid var(--border);">En Descanso (REST)</th>
+                        </tr>
+                    </thead>
+                    
+                    <tbody>
+                        <tr th:each="semanaNum : ${#numbers.sequence(1, totalSemanas)}">
+                            
+                            <td style="background: var(--bg-elevated); font-weight: 600; color: var(--text-secondary); position: sticky; left: 0; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border);" 
+                                th:text="'Semana ' + ${semanaNum}">
+                            </td>
+                            
+                            <td th:each="tarea : ${tareas}" style="border-left: 1px solid var(--border); border-bottom: 1px solid var(--border);">
+                                <span th:each="asig : ${asignaciones}" 
+                                      th:if="${asig.weekNumber == semanaNum && asig.task != null && asig.task.id == tarea.id}"
+                                      th:text="${asig.employee.name}"
+                                      style="font-weight: 600; color: var(--text-primary);">
+                                </span>
+                            </td>
+                            
+                            <td style="background: rgba(239,68,68,0.02); border-left: 1px solid var(--border); border-bottom: 1px solid var(--border);">
+                                <span th:each="asig : ${asignaciones}"
+                                      th:if="${asig.weekNumber == semanaNum && asig.task == null}"
+                                      th:text="${asig.employee.name}"
+                                      class="badge-rest me-1 mb-1 d-inline-block">
+                                </span>
+                            </td>
+                            
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+</body>
+</html>

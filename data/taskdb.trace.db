@@ -1,0 +1,113 @@
+2026-05-16 22:37:03.137295-04:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Error de Sintaxis en sentencia SQL "[*]spring.h2.console.settings.web-allow-others=false"; se esperaba "SAVEPOINT, SCRIPT, SHUTDOWN"
+Syntax error in SQL statement "[*]spring.h2.console.settings.web-allow-others=false"; expected "SAVEPOINT, SCRIPT, SHUTDOWN"; SQL statement:
+spring.h2.console.settings.web-allow-others=false [42001-240]
+2026-05-16 23:43:04.143352-04:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Error de Sintaxis en sentencia SQL "SELECT \000d\000a    a.id,\000d\000a    a.semana,\000d\000a    e.nombre,\000d\000a    e.apellido,\000d\000a    t.nombre AS tarea\000d\000aFROM asignaciones a\000d\000aJOIN empleados e ON e.id = a.empleado_id\000d\000aJOIN tareas t ON t.id = a.tarea_id\000d\000aWHERE t.id = [*]*\000d\000aORDER BY a.semana"; se esperaba "ALL (, ANY (, SOME ("
+Syntax error in SQL statement "SELECT \000d\000a    a.id,\000d\000a    a.semana,\000d\000a    e.nombre,\000d\000a    e.apellido,\000d\000a    t.nombre AS tarea\000d\000aFROM asignaciones a\000d\000aJOIN empleados e ON e.id = a.empleado_id\000d\000aJOIN tareas t ON t.id = a.tarea_id\000d\000aWHERE t.id = [*]*\000d\000aORDER BY a.semana"; expected "ALL (, ANY (, SOME ("; SQL statement:
+SELECT 
+    a.id,
+    a.semana,
+    e.nombre,
+    e.apellido,
+    t.nombre AS tarea
+FROM asignaciones a
+JOIN empleados e ON e.id = a.empleado_id
+JOIN tareas t ON t.id = a.tarea_id
+WHERE t.id = *
+ORDER BY a.semana [42001-240]
+2026-05-16 23:43:09.667428-04:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Error de Sintaxis en sentencia SQL "SELECT \000d\000a    a.id,\000d\000a    a.semana,\000d\000a    e.nombre,\000d\000a    e.apellido,\000d\000a    t.nombre AS tarea\000d\000aFROM asignaciones a\000d\000aJOIN empleados e ON e.id = a.empleado_id\000d\000aJOIN tareas t ON t.id = a.tarea_id\000d\000aWHERE t.id = [*]*"; se esperaba "ALL (, ANY (, SOME ("
+Syntax error in SQL statement "SELECT \000d\000a    a.id,\000d\000a    a.semana,\000d\000a    e.nombre,\000d\000a    e.apellido,\000d\000a    t.nombre AS tarea\000d\000aFROM asignaciones a\000d\000aJOIN empleados e ON e.id = a.empleado_id\000d\000aJOIN tareas t ON t.id = a.tarea_id\000d\000aWHERE t.id = [*]*"; expected "ALL (, ANY (, SOME ("; SQL statement:
+SELECT 
+    a.id,
+    a.semana,
+    e.nombre,
+    e.apellido,
+    t.nombre AS tarea
+FROM asignaciones a
+JOIN empleados e ON e.id = a.empleado_id
+JOIN tareas t ON t.id = a.tarea_id
+WHERE t.id = * [42001-240]
+2026-05-16 23:43:09.667428-04:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Error de Sintaxis en sentencia SQL "[*]ORDER BY a.semana"
+Syntax error in SQL statement "[*]ORDER BY a.semana"; SQL statement:
+ORDER BY a.semana [42000-240]
+2026-05-16 23:43:21.643111-04:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Error de Sintaxis en sentencia SQL "[*]SEDELETE FROM asignaciones WHERE tarea_id = 7"; se esperaba "SAVEPOINT, SCRIPT, SHUTDOWN"
+Syntax error in SQL statement "[*]SEDELETE FROM asignaciones WHERE tarea_id = 7"; expected "SAVEPOINT, SCRIPT, SHUTDOWN"; SQL statement:
+SEDELETE FROM asignaciones WHERE tarea_id = 7 [42001-240]
+2026-05-16 23:43:22.763350-04:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Error de Sintaxis en sentencia SQL "[*]SEDELETE FROM asignaciones WHERE tarea_id = 7"; se esperaba "SAVEPOINT, SCRIPT, SHUTDOWN"
+Syntax error in SQL statement "[*]SEDELETE FROM asignaciones WHERE tarea_id = 7"; expected "SAVEPOINT, SCRIPT, SHUTDOWN"; SQL statement:
+SEDELETE FROM asignaciones WHERE tarea_id = 7 [42001-240]
+2026-05-16 23:43:36.195972-04:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Error de Sintaxis en sentencia SQL "[*]SEDELETE FROM asignaciones WHERE tarea_id = 6"; se esperaba "SAVEPOINT, SCRIPT, SHUTDOWN"
+Syntax error in SQL statement "[*]SEDELETE FROM asignaciones WHERE tarea_id = 6"; expected "SAVEPOINT, SCRIPT, SHUTDOWN"; SQL statement:
+SEDELETE FROM asignaciones WHERE tarea_id = 6 [42001-240]
+2026-05-16 23:51:19.562136-04:00 jdbc[14]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Error de Sintaxis en sentencia SQL "SELECT *\000d\000a[*]10FROM planillas\000d\000a10WHERE estado = 'ACTIVE'"
+Syntax error in SQL statement "SELECT *\000d\000a[*]10FROM planillas\000d\000a10WHERE estado = 'ACTIVE'"; SQL statement:
+SELECT *
+10FROM planillas
+10WHERE estado = 'ACTIVE' [42000-240]
+2026-05-17 00:30:04.907376-04:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Error de Sintaxis en sentencia SQL "SELECT \000d\000a    a.id,\000d\000a    a.semana,\000d\000a    e.nombre,\000d\000a    e.apellido,\000d\000a    t.nombre AS tarea\000d\000aFROM asignaciones a\000d\000aJOIN empleados e ON e.id = a.empleado_id\000d\000aJOIN tareas t ON t.id = a.tarea_id\000d\000aWHERE t.id = [*]*"; se esperaba "ALL (, ANY (, SOME ("
+Syntax error in SQL statement "SELECT \000d\000a    a.id,\000d\000a    a.semana,\000d\000a    e.nombre,\000d\000a    e.apellido,\000d\000a    t.nombre AS tarea\000d\000aFROM asignaciones a\000d\000aJOIN empleados e ON e.id = a.empleado_id\000d\000aJOIN tareas t ON t.id = a.tarea_id\000d\000aWHERE t.id = [*]*"; expected "ALL (, ANY (, SOME ("; SQL statement:
+SELECT 
+    a.id,
+    a.semana,
+    e.nombre,
+    e.apellido,
+    t.nombre AS tarea
+FROM asignaciones a
+JOIN empleados e ON e.id = a.empleado_id
+JOIN tareas t ON t.id = a.tarea_id
+WHERE t.id = * [42001-240]
+2026-05-17 00:30:04.908880-04:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Error de Sintaxis en sentencia SQL "[*]ORDER BY a.semana"
+Syntax error in SQL statement "[*]ORDER BY a.semana"; SQL statement:
+ORDER BY a.semana [42000-240]
+2026-05-17 00:30:41.104114-04:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Error de Sintaxis en sentencia SQL "SELECT \000d\000a    a.id,\000d\000a    a.semana,\000d\000a    e.nombre,\000d\000a    e.apellido,\000d\000a    t.nombre AS tarea\000d\000aFROM asignaciones a\000d\000aJOIN empleados e ON e.id = a.empleado_id\000d\000aJOIN tareas t ON t.id = a.tarea_id\000d\000aWHERE t.id = 28[*]TAREA_AREA \000d\000aORDER BY a.semana"
+Syntax error in SQL statement "SELECT \000d\000a    a.id,\000d\000a    a.semana,\000d\000a    e.nombre,\000d\000a    e.apellido,\000d\000a    t.nombre AS tarea\000d\000aFROM asignaciones a\000d\000aJOIN empleados e ON e.id = a.empleado_id\000d\000aJOIN tareas t ON t.id = a.tarea_id\000d\000aWHERE t.id = 28[*]TAREA_AREA \000d\000aORDER BY a.semana"; SQL statement:
+SELECT 
+    a.id,
+    a.semana,
+    e.nombre,
+    e.apellido,
+    t.nombre AS tarea
+FROM asignaciones a
+JOIN empleados e ON e.id = a.empleado_id
+JOIN tareas t ON t.id = a.tarea_id
+WHERE t.id = 28TAREA_AREA 
+ORDER BY a.semana [42000-240]
+2026-05-17 01:15:10.311352-04:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLDataException: Conversión de datos fallida, convirtiendo "'' (PLANILLAS: ""ID"" BIGINT GENERATED BY DEFAULT AS IDENTITY(START WITH 1 RESTART WITH 7) NOT NULL)"
+Data conversion error converting "'' (PLANILLAS: ""ID"" BIGINT GENERATED BY DEFAULT AS IDENTITY(START WITH 1 RESTART WITH 7) NOT NULL)"; SQL statement:
+UPDATE "PUBLIC"."PLANILLAS" SET "ID"=? ,"FECHA_FIN"=? ,"GENERADA_EN"=? ,"FECHA_INICIO"=? ,"ESTADO"=?  WHERE "ID"=? [22018-240]
+2026-05-17 01:15:10.314370-04:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLDataException: Conversión de datos fallida, convirtiendo "'' (PLANILLAS: ""ID"" BIGINT GENERATED BY DEFAULT AS IDENTITY(START WITH 1 RESTART WITH 7) NOT NULL)"
+Data conversion error converting "'' (PLANILLAS: ""ID"" BIGINT GENERATED BY DEFAULT AS IDENTITY(START WITH 1 RESTART WITH 7) NOT NULL)"; SQL statement:
+UPDATE "PUBLIC"."PLANILLAS" SET "ID"=? ,"FECHA_FIN"=? ,"GENERADA_EN"=? ,"FECHA_INICIO"=? ,"ESTADO"=?  WHERE "ID"=? [22018-240]
+2026-05-17 09:48:31.701016-04:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Tabla "UPDATE" no encontrada
+Table "UPDATE" not found; SQL statement:
+SELECT * FROM UPDATE planillas
+SET estado = 'ARCHIVED'
+WHERE estado = 'ACTIVE'
+AND id <> (
+    SELECT MAX(id)
+    FROM planillas
+    WHERE estado = 'ACTIVE'
+) [42102-240]
+2026-05-17 09:50:12.751151-04:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Error de Sintaxis en sentencia SQL "DELETE[*]"; se esperaba "identifier"
+Syntax error in SQL statement "DELETE[*]"; expected "identifier"; SQL statement:
+DELETE [42001-240]
+2026-05-17 09:57:11.969866-04:00 jdbc[14]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Error de Sintaxis en sentencia SQL "CREATE UNIQUE INDEX uq_single_active_payroll\000d\000aON planillas (estado)\000d\000a[*]WHERE estado = 'ACTIVE'"
+Syntax error in SQL statement "CREATE UNIQUE INDEX uq_single_active_payroll\000d\000aON planillas (estado)\000d\000a[*]WHERE estado = 'ACTIVE'"; SQL statement:
+CREATE UNIQUE INDEX uq_single_active_payroll
+ON planillas (estado)
+WHERE estado = 'ACTIVE' [42000-240]

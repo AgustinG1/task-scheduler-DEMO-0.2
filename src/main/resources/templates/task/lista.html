@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout(~{::#page-content}, 'Tareas')}">
+<body>
+
+<div id="page-content" th:fragment="content">
+    
+    <div class="container-fluid p-0">
+        <div class="page-header fade-up mb-4">
+            <h1 class="page-title">Gestión de Tareas</h1>
+            <p class="page-subtitle">Administrá las actividades disponibles y su nivel de exclusividad</p>
+        </div>
+
+        <div class="row g-4">
+            
+            <div class="col-12 col-xl-4 fade-up fade-up-1">
+                <div class="card-dark">
+                    <div class="card-header-dark">
+                        <span class="card-title-dark">
+                            <i class="bi bi-list-check me-2" style="color:var(--accent)"></i>Nueva Tarea
+                        </span>
+                    </div>
+                    <div class="card-body-dark">
+                        <form th:action="@{/tasks/guardar}" th:object="${nuevaTarea}" method="post" class="form-dark">
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Nombre de la tarea</label>
+                                <input type="text" th:field="*{name}" class="form-control" placeholder="Ej: Limpiar vitrinas" required/>
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="form-label">Tipo de Tarea</label>
+                                <select th:field="*{type}" id="taskTypeSelect" class="form-select" required onchange="toggleAreaSelect()">
+                                    <option value="" disabled selected>-- Seleccionar tipo --</option>
+                                    <option value="GENERAL">General (Todos pueden hacerla)</option>
+                                    <option value="SPECIFIC">Específica (Requiere área autorizada)</option>
+                                </select>
+                            </div>
+
+                            <div class="mb-4" id="areaSelectDiv" style="display: none;">
+                                <label class="form-label">Área Autorizada</label>
+                                <select name="areaId" class="form-select">
+                                    <option value="" disabled selected>-- Seleccionar área --</option>
+                                    <option th:each="area : ${areas}" th:value="${area.id}" th:text="${area.nombre}"></option>
+                                </select>
+                                <div style="color: var(--text-muted); font-size: 11px; margin-top: 5px;">
+                                    <i class="bi bi-info-circle"></i> Solo los empleados de esta área harán esta tarea.
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn-primary-dark w-100 justify-content-center">
+                                <i class="bi bi-check2-circle"></i> Guardar tarea
+                            </button>
+                        </form>
+
+                        <script>
+                            function toggleAreaSelect() {
+                                var type = document.getElementById("taskTypeSelect").value;
+                                var areaDiv = document.getElementById("areaSelectDiv");
+                                if (type === "SPECIFIC") {
+                                    areaDiv.style.display = "block"; // Aparece
+                                } else {
+                                    areaDiv.style.display = "none";  // Se oculta
+                                }
+                            }
+                        </script>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-xl-8 fade-up fade-up-2">
+                <div class="card-dark">
+                    <div class="card-header-dark">
+                        <span class="card-title-dark">
+                            <i class="bi bi-card-checklist me-2" style="color:var(--accent)"></i>Catálogo de Tareas
+                        </span>
+                        <span style="font-size:12px; color:var(--text-muted); font-family:var(--font-mono)" th:text="${#lists.size(tasks)} + ' tareas'"></span>
+                    </div>
+                    
+                    <div th:if="${#lists.isEmpty(tasks)}" class="empty-state">
+                        <i class="bi bi-inbox" style="font-size: 2rem;"></i>
+                        <p>Todavía no hay tareas registradas en el sistema</p>
+                    </div>
+
+                    <table th:unless="${#lists.isEmpty(tasks)}" class="table-dark-custom">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Nombre</th>
+                                <th>Tipo</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="task : ${tasks}">
+                                <td style="color:var(--text-muted); font-family:var(--font-mono)" th:text="${task.id}"></td>
+                                <td><span style="font-weight:600" th:text="${task.name}"></span></td>
+                                <td>
+                                    <span th:class="${task.type != null and task.type.name() == 'GENERAL' ? 'badge-general' : 'badge-specific'}" 
+                                          th:text="${task.type}"></span>
+                                </td>
+                                <td>
+                                    <div class="d-flex gap-2">
+                                        <a th:href="@{/tasks/editar/{id}(id=${task.id})}" class="btn-edit">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        <a th:href="@{/tasks/eliminar/{id}(id=${task.id})}" class="btn-danger-ghost"
+                                           onclick="return confirm('¿Eliminar esta tarea?')">
+                                            <i class="bi bi-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

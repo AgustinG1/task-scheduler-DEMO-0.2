@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Editar Empleado</title>
+    <link th:replace="~{layout/base :: head}">
+</head>
+<body>
+<div class="container mt-4">
+    <div class="card-dark">
+        <div class="card-header-dark">
+            <span class="card-title-dark">
+                <i class="bi bi-pencil-square me-2" style="color:var(--accent)"></i>Editar Empleado
+            </span>
+        </div>
+        <div class="card-body-dark">
+            <form th:action="@{/employees/editar/{id}(id=${employee.id})}" method="post" class="form-dark">
+                <div class="mb-3">
+                    <label class="form-label">Nombre</label>
+                    <!-- CAMBIO: usa employee.name, no employee.nombre -->
+                    <input type="text" name="nombre" th:value="${employee.name}" class="form-control" required/>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Apellido</label>
+                    <input type="text" name="apellido" th:value="${employee.apellido}" class="form-control"/>
+                </div>
+                <div class="mb-4">
+                    <label class="form-label">Área</label>
+                    <select name="area.id" class="form-select" required>
+                        <!-- Eliminamos la opción "Sin área" porque el área es obligatoria -->
+                        <option th:each="area : ${areas}"
+                                th:value="${area.id}"
+                                th:text="${area.nombre}"
+                                th:selected="${area.id == employee.area.id}">
+                        </option>
+                    </select>
+                </div>
+                <div class="d-flex gap-2 justify-content-end">
+                    <button type="submit" class="btn-primary-dark">
+                        <i class="bi bi-check2-circle"></i> Actualizar
+                    </button>
+                    <a th:href="@{/employees}" class="btn-ghost">
+                        <i class="bi bi-x-circle"></i> Cancelar
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+</html>

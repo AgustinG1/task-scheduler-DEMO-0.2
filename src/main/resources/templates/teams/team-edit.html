@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout(~{::#page-content}, 'Panel del Equipo')}">
+<body>
+
+<div id="page-content" th:fragment="content">
+    
+    <div class="container-fluid p-0">
+        
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 fade-up gap-3">
+            <div>
+                <h1 class="page-title">Panel de Control</h1>
+                <p class="page-subtitle" th:text="'Configurando: ' + ${equipo.name}"></p>
+            </div>
+            <a th:href="@{/teams}" class="btn-ghost w-100 justify-content-center" style="max-width: 250px;">
+                <i class="bi bi-arrow-left me-1"></i> Volver a Equipos
+            </a>
+        </div>
+
+        <div class="card-dark mb-4 fade-up fade-up-1">
+            <div class="card-header-dark">
+                <span class="card-title-dark"><i class="bi bi-gear me-2" style="color:var(--accent)"></i>Ajustes y Catálogos del Equipo</span>
+            </div>
+            <div class="card-body-dark">
+                <form th:action="@{/teams/actualizar}" th:object="${equipo}" method="post" class="form-dark m-0">
+                    <input type="hidden" th:field="*{id}" />
+                    
+                    <div class="row g-3">
+                        <div class="col-12 col-md-5">
+                            <label class="form-label">Nombre del Equipo</label>
+                            <input type="text" th:field="*{name}" class="form-control" required/>
+                        </div>
+                        <div class="col-12 col-md-7">
+                            <label class="form-label">Descripción</label>
+                            <input type="text" th:field="*{description}" class="form-control"/>
+                        </div>
+                        
+<div class="col-12 mt-3">
+                            <label class="form-label" style="color: var(--text-secondary);">Áreas operativas del equipo:</label>
+                            <div class="row g-2 mt-1">
+                                <div class="col-12 col-sm-6 col-md-4" th:each="area : ${todasLasAreas}">
+                                    <label class="d-flex align-items-center p-2 w-100" style="background: rgba(0,0,0,0.2); border-radius: 8px; border: 1px solid var(--border); cursor: pointer; gap: 10px;">
+                                        <input class="form-check-input m-0 flex-shrink-0" type="checkbox" name="areasIds" th:value="${area.id}" th:checked="${equipo.areas != null && equipo.areas.contains(area)}">
+                                        <span th:text="${area.nombre}" style="color: var(--text-primary); font-size: 13.5px; user-select: none;"></span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12 mt-4">
+                            <label class="form-label" style="color: var(--text-secondary); border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px; display: block;">
+                                Módulos de Tareas asignados a este equipo:
+                            </label>
+                            <div class="row g-2 mt-2" style="max-height: 250px; overflow-y: auto; overflow-x: hidden; padding-right: 5px;">
+                                <div class="col-12 col-lg-6" th:each="cat : ${todosLosCatalogos}">
+                                    <label class="d-flex align-items-center justify-content-between p-3 w-100" style="background: rgba(0,0,0,0.2); border-radius: 8px; border: 1px solid var(--border); cursor: pointer;">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <input class="form-check-input m-0 flex-shrink-0" type="checkbox" name="taskGroupsIds" th:value="${cat.id}" th:checked="${equipo.taskGroups != null && equipo.taskGroups.contains(cat)}">
+                                            <span style="color: var(--text-primary); font-size: 14px; user-select: none;">
+                                                <i class="bi bi-box-seam me-1" style="color:var(--accent)"></i> <span th:text="${cat.name}"></span>
+                                            </span>
+                                        </div>
+                                        <span class="badge-general text-nowrap" style="font-size: 0.7rem; background: rgba(255,255,255,0.05); color: var(--text-secondary);" th:text="${cat.tasks.size()} + ' tareas'"></span>
+                                    </label>
+                                </div>
+                                <div class="col-12" th:if="${#lists.isEmpty(todosLosCatalogos)}">
+                                    <span style="color: var(--text-muted); font-size: 0.9rem;">No hay módulos creados en el sistema. Ve a la sección de "Catálogos" para armar el primero.</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12 d-flex justify-content-center justify-content-md-end mt-4">
+                            <button type="submit" class="btn-primary-dark w-100 justify-content-center" style="max-width: 250px; height: 42px;">
+                                <i class="bi bi-save me-1"></i> Guardar Ajustes
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="card-dark fade-up fade-up-2">
+            <div class="card-header-dark d-flex justify-content-between align-items-center">
+                <span class="card-title-dark"><i class="bi bi-people me-2" style="color:var(--accent)"></i>Directorio de Empleados</span>
+            </div>
+            
+            <div th:if="${#lists.isEmpty(todosLosEmpleados)}" class="empty-state p-4 text-center">
+                <i class="bi bi-person-x" style="font-size: 2.5rem; color: var(--text-muted);"></i>
+                <p class="mt-2" style="color: var(--text-secondary);">No hay empleados disponibles para las áreas seleccionadas de este equipo.</p>
+            </div>
+
+            <div class="table-responsive" th:unless="${#lists.isEmpty(todosLosEmpleados)}">
+                <table class="table-dark-custom text-center m-0">
+                    <thead>
+                        <tr>
+                            <th>Empleado</th>
+                            <th>Estado</th>
+                            <th>Área Asignada</th>
+                            <th>Acciones Rápidas</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="emp : ${todosLosEmpleados}">
+                            <td style="font-weight: 600; color: var(--text-primary); white-space: nowrap;" th:text="${emp.name} + ' ' + (${emp.apellido} != null ? ${emp.apellido} : '')"></td>
+                            
+                            <td style="white-space: nowrap;">
+                                <span th:if="${emp.active}" class="badge-general">Activo</span>
+                                <span th:unless="${emp.active}" class="badge-rest" style="background: rgba(239,68,68,0.2); color: #ef4444;">Suspendido/Vacaciones</span>
+                            </td>
+                            
+                            <td style="color:var(--text-secondary); white-space: nowrap;" th:text="${emp.area != null ? emp.area.nombre : 'Sin Área'}"></td>
+                            
+                            <td style="white-space: nowrap;">
+                                <button type="button" class="btn-ghost text-nowrap" style="color: var(--accent); padding: 4px 12px;" 
+                                        data-bs-toggle="modal" th:data-bs-target="'#modalEmpleado' + ${emp.id}">
+                                    <i class="bi bi-person-gear me-1"></i> Configurar
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <div th:each="emp : ${todosLosEmpleados}">
+        <div class="modal fade" th:id="'modalEmpleado' + ${emp.id}" tabindex="-1" aria-hidden="true" style="text-align: left;">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content" style="background: var(--bg-card); border: 1px solid var(--border);">
+                    <div class="modal-header" style="border-bottom: 1px solid var(--border);">
+                        <h5 class="modal-title" style="color: var(--text-primary);">Configurar a <span th:text="${emp.name}"></span></h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form th:action="@{/teams/empleado/actualizar}" method="post" class="form-dark">
+                            <input type="hidden" name="empleadoId" th:value="${emp.id}" />
+                            <input type="hidden" name="equipoId" th:value="${equipo.id}" /> 
+                            
+                            <div class="mb-3">
+                                <label class="form-label" style="color: var(--text-secondary);">Estado Laboral</label>
+                                <select name="active" class="form-control">
+                                    <option value="true" th:selected="${emp.active}">Operativo / Activo</option>
+                                    <option value="false" th:selected="${!emp.active}">Vacaciones / Licencia / Suspendido</option>
+                                </select>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label class="form-label" style="color: var(--text-secondary);">Área Asignada</label>
+                                <select name="areaId" class="form-control">
+                                    <option th:each="a : ${todasLasAreas}" 
+                                            th:value="${a.id}" 
+                                            th:text="${a.nombre}"
+                                            th:selected="${emp.area != null && emp.area.id == a.id}">
+                                    </option>
+                                </select>
+                            </div>
+                            
+                            <button type="submit" class="btn-primary-dark w-100 justify-content-center"><i class="bi bi-check2-circle me-1"></i> Aplicar Cambios</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>

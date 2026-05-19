@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout(~{::section}, 'Áreas')}">
+<body>
+<section th:fragment="content">
+
+    <!-- Page header -->
+    <div class="page-header fade-up">
+        <div>
+            <h1 class="page-title">Gestión de Áreas</h1>
+            <p class="page-subtitle">Administrá los departamentos o equipos de trabajo</p>
+        </div>
+    </div>
+
+    <div class="row g-4">
+
+        <!-- Form card -->
+        <div class="col-lg-4 fade-up fade-up-1">
+            <div class="card-dark">
+                <div class="card-header-dark">
+                    <span class="card-title-dark"><i class="bi bi-plus-circle me-2" style="color:var(--accent)"></i>Nueva Área</span>
+                </div>
+                <div class="card-body-dark">
+                    <form th:action="@{/areas/guardar}" th:object="${nuevaArea}" method="post" class="form-dark">
+                        <div class="mb-3">
+                            <label class="form-label">Nombre</label>
+                            <input type="text" class="form-control" th:field="*{nombre}" placeholder="Ej: Tortas" required/>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label">Descripción <span style="color:var(--text-muted)">(opcional)</span></label>
+                            <input type="text" class="form-control" th:field="*{descripcion}" placeholder="Breve descripción"/>
+                        </div>
+                        <button type="submit" class="btn-primary-dark w-100">
+                            <i class="bi bi-plus-lg"></i> Guardar área
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Table card -->
+        <div class="col-lg-8 fade-up fade-up-2">
+            <div class="card-dark">
+                <div class="card-header-dark">
+                    <span class="card-title-dark"><i class="bi bi-grid-3x3-gap me-2" style="color:var(--accent)"></i>Áreas registradas</span>
+                    <span style="font-size:12px; color:var(--text-muted); font-family:var(--font-mono)" th:text="${#lists.size(areas)} + ' áreas'"></span>
+                </div>
+                <div th:if="${#lists.isEmpty(areas)}" class="empty-state">
+                    <i class="bi bi-inbox"></i>
+                    <p>Todavía no hay áreas registradas</p>
+                </div>
+                <table th:unless="${#lists.isEmpty(areas)}" class="table-dark-custom">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Nombre</th>
+                            <th>Descripción</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="area : ${areas}">
+                            <td style="color:var(--text-muted); font-family:var(--font-mono)" th:text="${area.id}"></td>
+                            <td>
+                                <span style="font-weight:600" th:text="${area.nombre}"></span>
+                            </td>
+                            <td style="color:var(--text-secondary)" th:text="${area.descripcion ?: '—'}"></td>
+                            <td>
+                                <div class="d-flex gap-2">
+                                    <a th:href="@{/areas/editar/{id}(id=${area.id})}" class="btn-edit">
+                                        <i class="bi bi-pencil"></i> Editar
+                                    </a>
+                                    <a th:href="@{/areas/eliminar/{id}(id=${area.id})}" class="btn-danger-ghost"
+                                       onclick="return confirm('¿Eliminar esta área?')">
+                                        <i class="bi bi-trash"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</section>
+</body>
+</html>

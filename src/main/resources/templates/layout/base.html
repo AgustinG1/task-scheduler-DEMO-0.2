@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es" 
+      th:fragment="layout(content, pageTitle)">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title th:text="${pageTitle != null ? pageTitle + ' · TaskScheduler' : 'TaskScheduler'}">TaskScheduler</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+
+    <style>
+        /* (TODO TU CSS ORIGINAL INTACTO) */
+        :root {
+            --bg-base:       #080e1a;
+            --bg-surface:    #0e1726;
+            --bg-card:       #111d2e;
+            --bg-elevated:   #162030;
+            --border:        rgba(255,255,255,0.06);
+            --border-hover:  rgba(255,255,255,0.12);
+            --accent:        #4f8ef7;
+            --accent-hover:  #6ba3ff;
+            --accent-glow:   rgba(79,142,247,0.18);
+            --success:       #22c55e;
+            --success-bg:    rgba(34,197,94,0.12);
+            --muted:         #4a7a9b;
+            --muted-bg:      rgba(74,122,155,0.12);
+            --text-primary:  #e8edf5;
+            --text-secondary:#7a9bc0;
+            --text-muted:    #3d5a75;
+            --danger:        #ef4444;
+            --warning:       #f59e0b;
+            --nav-height:    60px;
+            --font-sans:     'DM Sans', sans-serif;
+            --font-mono:     'JetBrains Mono', monospace;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; }
+
+        body {
+            font-family: var(--font-sans);
+            background: var(--bg-base);
+            color: var(--text-primary);
+            min-height: 100vh;
+            margin: 0;
+            overflow-x: hidden; /* Agregado para evitar scroll horizontal en móviles */
+        }
+
+        /* ─── NAVBAR ─── */
+        .app-navbar {
+            position: sticky;
+            top: 0;
+            z-index: 1000; /* Aumentado para que no lo tapen las tablas */
+            height: var(--nav-height);
+            background: rgba(8,14,26,0.85);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between; /* Añadido para empujar el botón a la derecha */
+            padding: 0 28px;
+            gap: 32px;
+        }
+
+        .app-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            flex-shrink: 0;
+        }
+
+        .brand-icon {
+            width: 32px;
+            height: 32px;
+            background: var(--accent);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            box-shadow: 0 0 16px var(--accent-glow);
+        }
+
+        .brand-name {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: -0.3px;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 2px;
+            flex: 1;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            padding: 7px 14px;
+            border-radius: 8px;
+            font-size: 13.5px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: all 0.15s ease;
+            white-space: nowrap;
+        }
+
+        .nav-link i { font-size: 15px; }
+
+        .nav-link:hover {
+            color: var(--text-primary);
+            background: var(--bg-elevated);
+        }
+
+        .nav-link.active {
+            color: var(--accent);
+            background: var(--accent-glow);
+        }
+
+        .nav-divider {
+            width: 1px;
+            height: 20px;
+            background: var(--border);
+            margin: 0 8px;
+        }
+
+        /* ─── MAIN CONTENT ─── */
+        .app-content {
+            padding: 32px 28px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* ─── PAGE HEADER ─── */
+        .page-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: 28px;
+            gap: 16px;
+        }
+
+        .page-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: -0.4px;
+            margin: 0;
+        }
+
+        .page-subtitle {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin: 4px 0 0;
+        }
+
+        /* ─── CARDS ─── */
+        .card-dark {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: border-color 0.15s;
+        }
+
+        .card-dark:hover { border-color: var(--border-hover); }
+
+        .card-header-dark {
+            padding: 18px 22px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .card-title-dark {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 0;
+        }
+
+        .card-body-dark { padding: 22px; }
+
+        /* ─── TABLES ─── */
+        .table-dark-custom {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13.5px;
+        }
+
+        .table-dark-custom thead th {
+            padding: 11px 16px;
+            background: var(--bg-surface);
+            color: var(--text-muted);
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+            border-bottom: 1px solid var(--border);
+            white-space: nowrap;
+        }
+
+        .table-dark-custom tbody tr {
+            border-bottom: 1px solid var(--border);
+            transition: background 0.1s;
+        }
+
+        .table-dark-custom tbody tr:last-child { border-bottom: none; }
+
+        .table-dark-custom tbody tr:hover { background: var(--bg-elevated); }
+
+        .table-dark-custom tbody td {
+            padding: 13px 16px;
+            color: var(--text-primary);
+            vertical-align: middle;
+        }
+
+        /* ─── BADGES ─── */
+        .badge-assigned {
+            background: var(--success-bg);
+            color: var(--success);
+            border: 1px solid rgba(34,197,94,0.25);
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 11.5px;
+            font-weight: 600;
+            font-family: var(--font-mono);
+        }
+
+        .badge-rest {
+            background: var(--muted-bg);
+            color: var(--muted);
+            border: 1px solid rgba(74,122,155,0.2);
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 11.5px;
+            font-weight: 600;
+            font-family: var(--font-mono);
+        }
+
+        .badge-specific {
+            background: rgba(245,158,11,0.12);
+            color: var(--warning);
+            border: 1px solid rgba(245,158,11,0.2);
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 11.5px;
+            font-weight: 600;
+        }
+
+        .badge-general {
+            background: var(--accent-glow);
+            color: var(--accent);
+            border: 1px solid rgba(79,142,247,0.2);
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 11.5px;
+            font-weight: 600;
+        }
+
+        /* ─── FORMS ─── */
+        .form-dark .form-label {
+            font-size: 12.5px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            letter-spacing: 0.3px;
+            margin-bottom: 6px;
+        }
+
+        .form-dark .form-control,
+        .form-dark .form-select {
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            border-radius: 8px;
+            font-size: 13.5px;
+            padding: 9px 13px;
+            font-family: var(--font-sans);
+            transition: border-color 0.15s, box-shadow 0.15s;
+        }
+
+        .form-dark .form-control:focus,
+        .form-dark .form-select:focus {
+            background: var(--bg-surface);
+            color: var(--text-primary);
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+            outline: none;
+        }
+
+        .form-dark .form-control::placeholder { color: var(--text-muted); }
+
+        .form-dark .form-select option {
+            background: var(--bg-surface);
+            color: var(--text-primary);
+        }
+
+        /* ─── BUTTONS ─── */
+        .btn-primary-dark {
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 9px 18px;
+            font-size: 13.5px;
+            font-weight: 600;
+            font-family: var(--font-sans);
+            cursor: pointer;
+            transition: all 0.15s;
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            text-decoration: none;
+        }
+
+        .btn-primary-dark:hover {
+            background: var(--accent-hover);
+            color: #fff;
+            box-shadow: 0 4px 16px var(--accent-glow);
+            transform: translateY(-1px);
+        }
+
+        .btn-ghost {
+            background: transparent;
+            color: var(--text-secondary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-size: 13px;
+            font-weight: 500;
+            font-family: var(--font-sans);
+            cursor: pointer;
+            transition: all 0.15s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            text-decoration: none;
+        }
+
+        .btn-ghost:hover {
+            color: var(--text-primary);
+            border-color: var(--border-hover);
+            background: var(--bg-elevated);
+        }
+
+        .btn-danger-ghost {
+            background: transparent;
+            color: var(--danger);
+            border: 1px solid rgba(239,68,68,0.2);
+            border-radius: 8px;
+            padding: 6px 12px;
+            font-size: 12px;
+            font-weight: 500;
+            font-family: var(--font-sans);
+            cursor: pointer;
+            transition: all 0.15s;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            text-decoration: none;
+        }
+
+        .btn-danger-ghost:hover {
+            background: rgba(239,68,68,0.08);
+            border-color: rgba(239,68,68,0.4);
+            color: var(--danger);
+        }
+
+        .btn-edit {
+            background: transparent;
+            color: var(--accent);
+            border: 1px solid rgba(79,142,247,0.2);
+            border-radius: 8px;
+            padding: 6px 12px;
+            font-size: 12px;
+            font-weight: 500;
+            font-family: var(--font-sans);
+            cursor: pointer;
+            transition: all 0.15s;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            text-decoration: none;
+        }
+
+        .btn-edit:hover {
+            background: var(--accent-glow);
+            border-color: rgba(79,142,247,0.4);
+            color: var(--accent);
+        }
+
+        .btn-warning-ghost {
+            background: transparent;
+            color: var(--warning);
+            border: 1px solid rgba(245,158,11,0.2);
+            border-radius: 8px;
+            padding: 6px 12px;
+            font-size: 12px;
+            font-weight: 500;
+            font-family: var(--font-sans);
+            cursor: pointer;
+            transition: all 0.15s;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            text-decoration: none;
+        }
+
+        .btn-warning-ghost:hover {
+            background: rgba(245,158,11,0.08);
+            border-color: rgba(245,158,11,0.4);
+            color: var(--warning);
+        }
+
+        /* ─── WEEK GROUPS (planilla) ─── */
+        .week-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 16px;
+            background: var(--bg-surface);
+            border-top: 1px solid var(--border);
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            font-family: var(--font-mono);
+        }
+
+        .week-number {
+            background: var(--accent-glow);
+            color: var(--accent);
+            width: 22px;
+            height: 22px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        /* ─── EMPTY STATE ─── */
+        .empty-state {
+            text-align: center;
+            padding: 60px 32px;
+            color: var(--text-muted);
+        }
+
+        .empty-state i {
+            font-size: 40px;
+            margin-bottom: 14px;
+            opacity: 0.4;
+            display: block;
+        }
+
+        .empty-state p { font-size: 14px; margin: 0; }
+
+        /* ─── STAT CARDS ─── */
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px 22px;
+            transition: border-color 0.15s;
+        }
+
+        .stat-card:hover { border-color: var(--border-hover); }
+
+        .stat-label {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--text-primary);
+            font-family: var(--font-mono);
+            letter-spacing: -1px;
+        }
+
+        /* ─── SCROLLBAR ─── */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border-hover); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+        /* ─── ANIMATIONS ─── */
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .fade-up { animation: fadeUp 0.3s ease both; }
+        .fade-up-1 { animation-delay: 0.05s; }
+        .fade-up-2 { animation-delay: 0.1s; }
+        .fade-up-3 { animation-delay: 0.15s; }
+
+        /* =======================================================
+           NUEVO: RESPONSIVE DESIGN (MÓVILES)
+           ======================================================= */
+           
+        /* Diseño del botón hamburguesa (Oculto en PC) */
+        .mobile-toggle {
+            display: none;
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            font-size: 24px;
+            padding: 4px 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .mobile-toggle:hover {
+            background: var(--bg-elevated);
+        }
+
+        @media (max-width: 992px) {
+            /* 1. Activar el botón hamburguesa */
+            .mobile-toggle {
+                display: block;
+            }
+
+            /* 2. Convertir el Navbar en un menú colapsable */
+            .nav-links {
+                position: absolute;
+                top: var(--nav-height);
+                left: 0;
+                width: 100%;
+                background: var(--bg-surface);
+                border-bottom: 1px solid var(--border);
+                flex-direction: column;
+                align-items: flex-start;
+                padding: 15px 28px;
+                gap: 8px;
+                
+                /* Estado Oculto (Persiana subida) */
+                transform: translateY(-10px);
+                opacity: 0;
+                pointer-events: none;
+                transition: all 0.3s ease;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            }
+
+            /* Estado Activo (Persiana bajada) - Se activa mediante JS */
+            .nav-links.active {
+                transform: translateY(0);
+                opacity: 1;
+                pointer-events: auto;
+            }
+
+            /* Ajustes visuales para los links en móvil */
+            .nav-link {
+                width: 100%;
+                padding: 12px 14px;
+                font-size: 15px;
+            }
+
+            .nav-divider {
+                width: 100%;
+                height: 1px;
+                margin: 5px 0;
+            }
+
+            /* 3. Ajustar márgenes para pantallas pequeñas */
+            .app-content {
+                padding: 20px 15px;
+            }
+
+            /* Apilar el título de página y los botones de acción */
+            .page-header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .page-header .btn-primary-dark,
+            .page-header .btn-ghost {
+                justify-content: center;
+                width: 100%;
+            }
+        }
+
+        /* =======================================================
+           TABLAS CONVERTIDAS EN TARJETAS PARA MÓVILES
+           ======================================================= */
+        @media (max-width: 768px) {
+            .table-dark-custom, 
+            .table-dark-custom tbody, 
+            .table-dark-custom tr, 
+            .table-dark-custom td {
+                display: block;
+                width: 100%;
+            }
+            
+            /* Ocultamos las cabeceras tradicionales de la tabla */
+            .table-dark-custom thead {
+                display: none; 
+            }
+            
+            /* Convertimos cada fila en una tarjeta redonda */
+            .table-dark-custom tbody tr {
+                background: var(--bg-surface);
+                border: 1px solid var(--border);
+                border-radius: 12px;
+                margin-bottom: 16px;
+                overflow: hidden;
+            }
+            
+            /* Cada celda se vuelve un renglón flexible */
+            .table-dark-custom tbody td {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                text-align: right;
+                border-bottom: 1px solid rgba(255,255,255,0.05);
+                padding: 12px 16px;
+            }
+            
+            .table-dark-custom tbody td:last-child {
+                border-bottom: none;
+                justify-content: center;  
+                background: rgba(0,0,0,0.1);
+            }
+            
+            /* Crea el título a la izquierda leyendo el data-label */
+            .table-dark-custom tbody td::before {
+                content: attr(data-label);
+                font-weight: 700;
+                color: var(--text-muted);
+                font-size: 11px;
+                text-transform: uppercase;
+                margin-right: 15px;
+                text-align: left;
+            }
+        }
+
+
+
+    </style>
+</head>
+<body>
+
+<nav class="app-navbar">
+    <a href="/" class="app-brand">
+        <div class="brand-icon">🐦</div>
+        <span class="brand-name">TaskScheduler</span>
+    </a>
+
+    <button class="mobile-toggle" id="menu-toggle-btn" aria-label="Abrir menú">
+        <i class="bi bi-list"></i>
+    </button>
+
+    <div class="nav-links">
+        <a th:href="@{/areas}" class="nav-link">
+            <i class="bi bi-grid-3x3-gap"></i> Áreas
+        </a>
+        <a th:href="@{/tasks}" class="nav-link">
+            <i class="bi bi-list-check"></i> Tareas
+        </a>
+        
+        <a th:href="@{/employees}" class="nav-link">
+            <i class="bi bi-people"></i> Empleados
+        </a>
+        <a th:href="@{/task-groups}" class="nav-link">
+            <i class="bi bi-box-seam"></i> Catálogos
+        </a>
+        
+        <a th:href="@{/teams}" class="nav-link">
+            <i class="bi bi-building"></i> Equipos
+        </a>
+
+        <div class="nav-divider"></div>
+        
+        <a th:href="@{/payroll}" class="nav-link">
+            <i class="bi bi-calendar3"></i> Planilla
+        </a>
+        <a th:href="@{/payroll/historial}" class="nav-link">
+            <i class="bi bi-clock-history"></i> Historial
+        </a>
+    </div>
+</nav>
+
+<main class="app-content">
+    <th:block th:insert="${content}"></th:block>   </main>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const menuBtn = document.getElementById('menu-toggle-btn');
+        const navMenu = document.querySelector('.nav-links');
+        const icon = menuBtn.querySelector('i');
+
+        menuBtn.addEventListener('click', function() {
+            // Activa o desactiva la clase que muestra el menú
+            navMenu.classList.toggle('active');
+            
+            // Cambia el ícono de las tres rayas a una X
+            if (navMenu.classList.contains('active')) {
+                icon.classList.remove('bi-list');
+                icon.classList.add('bi-x-lg');
+            } else {
+                icon.classList.remove('bi-x-lg');
+                icon.classList.add('bi-list');
+            }
+        });
+    });
+</script>
+
+</body>
+</html>

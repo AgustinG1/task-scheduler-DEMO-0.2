@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout(~{::#page-content}, 'Editar Tarea')}">
+<body>
+
+<div id="page-content" th:fragment="content">
+    
+    <div class="container-fluid p-0">
+        
+        <div class="page-header fade-up mb-4">
+            <h1 class="page-title">Editar Tarea</h1>
+            <p class="page-subtitle">Modificá los detalles y configuraciones de la tarea seleccionada</p>
+        </div>
+
+        <div class="row fade-up fade-up-1">
+            <div class="col-12 col-xl-6">
+                <div class="card-dark">
+                    <div class="card-header-dark">
+                        <span class="card-title-dark">
+                            <i class="bi bi-pencil-square me-2" style="color:var(--accent)"></i>Actualizar Información
+                        </span>
+                    </div>
+                    <div class="card-body-dark">
+                        
+                        <form th:action="@{/tasks/editar/{id}(id=${task.id})}" th:object="${task}" method="post" class="form-dark">
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Nombre de la tarea</label>
+                                <input type="text" class="form-control" th:field="*{name}" required/>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Descripción</label>
+                                <input type="text" class="form-control" th:field="*{description}"/>
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="form-label">Tipo de Tarea</label>
+                                <select class="form-select" th:field="*{type}">
+                                    <option th:each="tipo : ${tipos}"
+                                            th:value="${tipo}"
+                                            th:text="${tipo}">
+                                    </option>
+                                </select>
+                            </div>
+
+                            <div class="d-flex gap-2 justify-content-end mt-3">
+                                <button type="submit" class="btn-primary-dark">
+                                    <i class="bi bi-save"></i> Actualizar
+                                </button>
+                                <a th:href="@{/tasks}" class="btn-ghost">
+                                    <i class="bi bi-x-circle"></i> Cancelar
+                                </a>
+                            </div>
+
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+</div>
+
+</body>
+</html>

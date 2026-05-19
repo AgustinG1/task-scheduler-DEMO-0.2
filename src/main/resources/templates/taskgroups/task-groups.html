@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout(~{::#page-content}, 'Catálogos de Tareas')}">
+<body>
+
+<div id="page-content" th:fragment="content">
+    <div class="container-fluid p-0">
+        <div class="page-header fade-up mb-4">
+            <h1 class="page-title">Catálogos de Tareas</h1>
+            <p class="page-subtitle">Agrupa tareas operativas en módulos para asignarlos rápidamente a los equipos</p>
+        </div>
+
+        <div class="card-dark mb-4 fade-up fade-up-1">
+            <div class="card-header-dark">
+                <span class="card-title-dark"><i class="bi bi-box-seam me-2" style="color:var(--accent)"></i>Nuevo Catálogo Módulo</span>
+            </div>
+            <div class="card-body-dark">
+                <form th:action="@{/task-groups/guardar}" th:object="${nuevoCatalogo}" method="post" class="form-dark m-0">
+                    <div class="row g-3 align-items-end">
+                        <div class="col-md-4">
+                            <label class="form-label" style="color: var(--text-secondary);">Nombre del Catálogo</label>
+                            <input type="text" th:field="*{name}" class="form-control" placeholder="Ej: Operaciones Base de Cocina" required/>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" style="color: var(--text-secondary);">Descripción</label>
+                            <input type="text" th:field="*{description}" class="form-control" placeholder="Ej: Tareas de limpieza general y hornos"/>
+                        </div>
+                        <div class="col-md-2">
+                            <button type="submit" class="btn-primary-dark w-100" style="height: 38px;">
+                                <i class="bi bi-save me-1"></i> Crear Módulo
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="fade-up fade-up-2">
+            <h4 style="color: var(--text-primary); margin-bottom: 1rem;"><i class="bi bi-collection"></i> Catálogos Disponibles</h4>
+            
+            <div th:if="${#lists.isEmpty(catalogos)}" class="empty-state">
+                <i class="bi bi-box-seam" style="font-size: 2.5rem; margin-bottom: 10px;"></i>
+                <p>No has creado ningún catálogo. Crea uno arriba para empezar a agrupar tareas.</p>
+            </div>
+
+            <div class="row g-4" th:unless="${#lists.isEmpty(catalogos)}">
+                <div class="col-md-4" th:each="cat : ${catalogos}">
+                    <div class="card-dark h-100" style="border: 1px solid var(--border); transition: transform 0.2s;">
+                        <div class="card-header-dark d-flex justify-content-between align-items-center" style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                            <span class="card-title-dark" style="font-size: 1.1rem; color: var(--text-primary);">
+                                <i class="bi bi-folder2-open me-2" style="color:var(--accent)"></i><span th:text="${cat.name}"></span>
+                            </span>
+                        </div>
+                        <div class="card-body-dark">
+                            <p style="color: var(--text-secondary); font-size: 0.9rem; min-height: 40px;" 
+                               th:text="${cat.description != null && !cat.description.isEmpty() ? cat.description : 'Sin descripción asignada'}"></p>
+                            
+                            <div class="mt-3 mb-4">
+                                <span class="badge-general" style="background: rgba(16, 185, 129, 0.1); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.2);">
+                                    <i class="bi bi-list-check me-1"></i> <span th:text="${cat.tasks.size()}"></span> Tareas incluidas
+                                </span>
+                            </div>
+                            
+                            <div class="d-flex gap-2">
+                                <a th:href="@{/task-groups/editar/{id}(id=${cat.id})}" class="btn-primary-dark w-100 text-center" style="padding: 6px;">
+                                    <i class="bi bi-gear"></i> Configurar Tareas
+                                </a>
+                                <a th:href="@{/task-groups/eliminar/{id}(id=${cat.id})}" class="btn-danger-ghost" style="padding: 6px 12px;"
+                                   onclick="return confirm('¿Eliminar este catálogo? No se borrarán las tareas del sistema, solo la agrupación.')">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout(~{::#page-content}, 'Configurar Catálogo')}">
+<body>
+
+<div id="page-content" th:fragment="content">
+    <div class="container-fluid p-0">
+        
+        <div class="d-flex justify-content-between align-items-center mb-4 fade-up">
+            <div>
+                <h1 class="page-title">Configurar Catálogo</h1>
+                <p class="page-subtitle" th:text="'Editando módulo: ' + ${catalogo.name}"></p>
+            </div>
+            <a th:href="@{/task-groups}" class="btn-ghost"><i class="bi bi-arrow-left me-1"></i> Volver a Catálogos</a>
+        </div>
+
+        <div class="card-dark mb-4 fade-up fade-up-1">
+            <div class="card-header-dark">
+                <span class="card-title-dark"><i class="bi bi-list-check me-2" style="color:var(--accent)"></i>Contenido del Catálogo</span>
+            </div>
+            <div class="card-body-dark">
+                <form th:action="@{/task-groups/actualizar}" th:object="${catalogo}" method="post" class="form-dark m-0">
+                    <input type="hidden" th:field="*{id}" />
+                    
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Nombre del Catálogo</label>
+                            <input type="text" th:field="*{name}" class="form-control" required/>
+                        </div>
+                        <div class="col-md-8">
+                            <label class="form-label">Descripción</label>
+                            <input type="text" th:field="*{description}" class="form-control"/>
+                        </div>
+
+                        <div class="col-md-12 mt-4">
+                            <label class="form-label" style="color: var(--text-secondary); border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px; display: block;">
+                                Selecciona las tareas que conformarán este catálogo:
+                            </label>
+                            <div class="d-flex gap-4 flex-wrap p-3 mt-2" style="background: rgba(0,0,0,0.2); border-radius: 8px; max-height: 300px; overflow-y: auto;">
+                                <div class="form-check form-check-inline m-0" style="width: 100%;" th:each="tarea : ${todasLasTareas}">
+                                    <input class="form-check-input" type="checkbox" name="tasksIds" th:value="${tarea.id}" 
+                                           th:id="'task_' + ${tarea.id}"
+                                           th:checked="${catalogo.tasks != null && catalogo.tasks.contains(tarea)}">
+                                    <label class="form-check-label d-flex justify-content-between" th:for="'task_' + ${tarea.id}" style="color: var(--text-primary); cursor: pointer; width: 100%;">
+                                        <span th:text="${tarea.name}"></span>
+                                        <span class="badge-general" style="font-size: 0.75rem; background: rgba(255,255,255,0.05); color: var(--text-secondary);" th:text="${tarea.labelIntuitivo}"></span>
+                                    </label>
+                                </div>
+                                <div th:if="${#lists.isEmpty(todasLasTareas)}" style="color: var(--text-muted); font-size: 0.9rem;">
+                                    El sistema no tiene tareas registradas. Ve a la sección de Tareas primero.
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-12 d-flex justify-content-end mt-4">
+                            <button type="submit" class="btn-primary-dark" style="width: 200px; height: 38px;">
+                                <i class="bi bi-save me-1"></i> Guardar Catálogo
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

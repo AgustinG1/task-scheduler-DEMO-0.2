@@ -1,0 +1,595 @@
+/*
+package com.taskapp.task_scheduler.service;
+
+import org.springframework.stereotype.Service;
+import lombok.RequiredArgsConstructor;
+
+import java.util.Comparator;
+
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import com.taskapp.task_scheduler.model.Assignment;
+import com.taskapp.task_scheduler.model.AssignmentStatus;
+import com.taskapp.task_scheduler.model.Employee;
+import com.taskapp.task_scheduler.model.Payroll;
+import com.taskapp.task_scheduler.model.PayrollStatus;
+import com.taskapp.task_scheduler.model.Task;
+import com.taskapp.task_scheduler.model.TaskType;
+import com.taskapp.task_scheduler.repository.AssignmentRepository;
+import com.taskapp.task_scheduler.repository.EmployeeRepository;
+import com.taskapp.task_scheduler.repository.PayrollRepository;
+import com.taskapp.task_scheduler.repository.TaskRepository;
+
+@Service
+@RequiredArgsConstructor
+public class AssignmentAlgorithm {
+
+    private final FeasibilityValidator validator;
+    private final EmployeeRepository employeeRepository;
+    private final TaskRepository taskRepository;
+    private final PayrollRepository payrollRepository;
+    private final AssignmentRepository assignmentRepository;
+
+  /*   public Payroll generatePayroll() {
+        return generatePayroll(16);
+    } */
+
+    public Payroll generatePayroll(int totalWeeks) {
+    List<Employee> empleados = employeeRepository.findByActiveTrue();
+    List<Task> tareas = taskRepository.findAll();
+
+    validator.validar(empleados, tareas);
+
+    // ← NUEVO: Archivar planilla activa anterior si existe
+    payrollRepository.findByStatus(PayrollStatus.ACTIVE).ifPresent(p -> {
+        p.setStatus(PayrollStatus.ARCHIVED);
+        payrollRepository.save(p);
+    });
+
+    Payroll payroll = new Payroll();
+    payroll.setStatus(PayrollStatus.ACTIVE);
+    payroll.setStartDate(LocalDate.now());
+    payroll.setEndDate(LocalDate.now().plusWeeks(totalWeeks));
+    payroll = payrollRepository.save(payroll);
+
+    Map<Long, Long> ultimaTarea = new HashMap<>();
+    Map<Long, Set<Long>> tareasRealizadas = new HashMap<>();
+
+    int trabajadoresPorSemana = Math.min(empleados.size(), tareas.size());
+
+    for (int semana = 1; semana <= totalWeeks; semana++) {
+        Set<Long> tareasOcupadasEstaSemana = new HashSet<>();
+
+        int indiceInicio = (semana - 1) % empleados.size();
+        List<Employee> ordenSemana = new ArrayList<>();
+
+        for (int i = 0; i < empleados.size(); i++) {
+            ordenSemana.add(empleados.get((indiceInicio + i) % empleados.size()));
+        }
+
+        List<Employee> trabajadores = new ArrayList<>(
+                ordenSemana.subList(0, trabajadoresPorSemana)
+        );
+        List<Employee> descansan = new ArrayList<>(
+                ordenSemana.subList(trabajadoresPorSemana, ordenSemana.size())
+        );
+// ← NUEVO: ordenar por cantidad de tareas disponibles (más restringido primero)
+        // Garantiza que quien tiene menos opciones elija primero
+        final Map<Long, Set<Long>> realizadasRef = tareasRealizadas;
+        final Map<Long, Long> ultimaRef = ultimaTarea;
+        
+        trabajadores.sort(Comparator.comparingInt(emp -> {
+            Set<Long> realizadasEmp = realizadasRef.getOrDefault(emp.getId(), new HashSet<>());
+            Long ultimaEmp = ultimaRef.get(emp.getId());
+            return (int) resolverElegibles(emp, tareas).stream()
+                    .filter(t -> !realizadasEmp.contains(t.getId()))
+                    .filter(t -> ultimaEmp == null || !t.getId().equals(ultimaEmp)) // Evita NullPointerException si no hay última tarea
+                    .count();
+        }));
+
+        // --- Procesar empleados que TRABAJAN esta semana ---
+        for (Employee empleado : trabajadores) {
+            List<Task> elegibles = resolverElegibles(empleado, tareas);
+
+            Task tareaSeleccionada = seleccionarTarea(
+                    empleado, elegibles, ultimaTarea, tareasRealizadas, tareasOcupadasEstaSemana
+            );
+
+            Assignment asignacion;
+
+            if (tareaSeleccionada == null) {
+                asignacion = asignarDescanso(empleado, payroll, semana);
+            } else {
+                asignacion = new Assignment();
+                asignacion.setEmployee(empleado);
+                asignacion.setPayroll(payroll);
+                asignacion.setWeekNumber(semana);
+                asignacion.setTask(tareaSeleccionada);
+                asignacion.setStatus(AssignmentStatus.ASSIGNED);
+
+                tareasOcupadasEstaSemana.add(tareaSeleccionada.getId());
+            }
+
+            assignmentRepository.save(asignacion);
+
+            if (tareaSeleccionada != null) {
+                ultimaTarea.put(empleado.getId(), tareaSeleccionada.getId());
+
+                Set<Long> realizadas = tareasRealizadas.getOrDefault(empleado.getId(), new HashSet<>());
+                realizadas.add(tareaSeleccionada.getId());
+                tareasRealizadas.put(empleado.getId(), realizadas);
+            }
+        }
+
+        // --- Procesar empleados que DESCANSAN esta semana ---
+        for (Employee empleado : descansan) {
+            Assignment descanso = asignarDescanso(empleado, payroll, semana);
+            assignmentRepository.save(descanso);
+        }
+    } // Fin del bucle de semanas
+
+    return payroll;
+}
+
+private List<Task> resolverElegibles(Employee employee, List<Task> todasLasTareas) {
+    List<Task> elegibles = new ArrayList<>();
+
+    for (Task tarea : todasLasTareas) {
+        if (tarea.getType() == TaskType.GENERAL) {
+            elegibles.add(tarea);
+        } else if (tarea.getType() == TaskType.SPECIFIC) {
+            boolean estaAutorizado = tarea.getAuthorizedAreas().stream()
+                    .anyMatch(ta -> ta.getArea().getId().equals(employee.getArea().getId()));
+
+            if (estaAutorizado) {
+                elegibles.add(tarea);
+            }
+        }
+    }
+
+    return elegibles;
+}
+private Task seleccionarTarea(Employee employee, List<Task> elegibles,
+            Map<Long, Long> ultimaTarea, Map<Long, Set<Long>> tareasRealizadas,
+            Set<Long> tareasOcupadasEstaSemana) {
+
+        Set<Long> realizadas = tareasRealizadas.getOrDefault(employee.getId(), new HashSet<>());
+
+        boolean completoCiclo = elegibles.stream().allMatch(t -> realizadas.contains(t.getId()));
+        if (completoCiclo) realizadas.clear();
+
+        Long idSemanaPasada = ultimaTarea.get(employee.getId());
+
+        // Intento 1: tarea nunca hecha + no consecutiva + no ocupada
+        List<Task> disponibles = elegibles.stream()
+                .filter(t -> !realizadas.contains(t.getId()))
+                .filter(t -> !t.getId().equals(idSemanaPasada))
+                .filter(t -> !tareasOcupadasEstaSemana.contains(t.getId()))
+                .collect(Collectors.toList());
+
+        // Priorizar SPECIFIC antes que GENERAL — evita que las tareas específicas
+        // queden sin usar bloqueando a empleados de otras áreas que necesitan los generals
+        disponibles.sort(Comparator.comparing(t -> t.getType() == TaskType.SPECIFIC ? 0 : 1));
+
+        if (!disponibles.isEmpty()) return disponibles.get(0);
+
+        // Intento 2 (fallback): cualquier tarea no consecutiva y no ocupada
+        // Se usa cuando todas las "nunca hechas" ya fueron tomadas esta semana
+        List<Task> fallback = elegibles.stream()
+                .filter(t -> !t.getId().equals(idSemanaPasada))
+                .filter(t -> !tareasOcupadasEstaSemana.contains(t.getId()))
+                .collect(Collectors.toList());
+
+        fallback.sort(Comparator.comparing(t -> t.getType() == TaskType.SPECIFIC ? 0 : 1));
+
+        return fallback.isEmpty() ? null : fallback.get(0);
+    }
+
+    private Assignment asignarDescanso(Employee employee, Payroll payroll, int semana) {
+        Assignment asignacionDescanso = new Assignment();
+
+        asignacionDescanso.setEmployee(employee);
+        asignacionDescanso.setPayroll(payroll);
+        asignacionDescanso.setWeekNumber(semana);
+        asignacionDescanso.setTask(null);
+        asignacionDescanso.setStatus(AssignmentStatus.REST);
+
+        return asignacionDescanso;
+    }
+}*/package com.taskapp.task_scheduler.service;
+
+import org.springframework.stereotype.Service;
+import lombok.RequiredArgsConstructor;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDate;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import com.taskapp.task_scheduler.model.*;
+import com.taskapp.task_scheduler.repository.*;
+
+@Service
+@RequiredArgsConstructor
+public class AssignmentAlgorithm {
+
+    private final FeasibilityValidator validator;
+    private final EmployeeRepository employeeRepository;
+    private final TaskRepository taskRepository;
+    private final PayrollRepository payrollRepository;
+    private final AssignmentRepository assignmentRepository;
+
+    @Transactional
+    public Payroll generatePayroll(int totalWeeks) {
+        List<Employee> empleadosRaw = employeeRepository.findByActiveTrue();
+        List<Task> tareas = taskRepository.findAll();
+
+        validator.validar(empleadosRaw, tareas);
+
+        payrollRepository.findByStatus(PayrollStatus.ACTIVE).ifPresent(p -> {
+            p.setStatus(PayrollStatus.ARCHIVED);
+            payrollRepository.save(p);
+        });
+
+        Payroll payroll = new Payroll();
+        payroll.setStatus(PayrollStatus.ACTIVE);
+        payroll.setStartDate(LocalDate.now());
+        payroll.setEndDate(LocalDate.now().plusWeeks(totalWeeks));
+        payroll = payrollRepository.save(payroll);
+
+        // Intercalar áreas (Round-Robin) para evitar que descansen todos los de un área juntos
+        Map<Long, List<Employee>> porArea = empleadosRaw.stream().collect(Collectors.groupingBy(e -> e.getArea().getId()));
+        List<Employee> empleados = new ArrayList<>();
+        boolean quedanEmpleados;
+        do {
+            quedanEmpleados = false;
+            for (List<Employee> listaArea : porArea.values()) {
+                if (!listaArea.isEmpty()) {
+                    empleados.add(listaArea.remove(0));
+                    quedanEmpleados = true;
+                }
+            }
+        } while (quedanEmpleados);
+
+        Map<Long, Long> ultimaTareaPorEmpleado = new HashMap<>();
+        Map<Long, Set<Long>> tareasRealizadasPorEmpleado = new HashMap<>();
+        
+        int trabajadoresPorSemana = Math.min(empleados.size(), tareas.size());
+        int descansanCount = Math.max(1, empleados.size() - trabajadoresPorSemana);
+
+        for (int semana = 1; semana <= totalWeeks; semana++) {
+            
+            // 🔥 LA MAGIA: Mezclar las tareas cada semana antes de asignarlas.
+            // Esto destruye el "Síndrome del último en la fila" y asegura una rotación orgánica.
+            List<Task> tareasPriorizadas = new ArrayList<>(tareas);
+            Collections.shuffle(tareasPriorizadas); 
+            
+            // Volvemos a colocar las Específicas arriba para no dejar máquinas vacías
+            tareasPriorizadas.sort((t1, t2) -> {
+                if (t1.getType() == TaskType.SPECIFIC && t2.getType() != TaskType.SPECIFIC) return -1;
+                if (t1.getType() != TaskType.SPECIFIC && t2.getType() == TaskType.SPECIFIC) return 1;
+                return 0;
+            });
+
+            int indiceInicio = ((semana - 1) * descansanCount) % empleados.size();
+            List<Employee> ordenSemana = new ArrayList<>();
+            for (int i = 0; i < empleados.size(); i++) {
+                ordenSemana.add(empleados.get((indiceInicio + i) % empleados.size()));
+            }
+
+            List<Employee> disponiblesParaAsignar = new ArrayList<>(ordenSemana.subList(0, trabajadoresPorSemana));
+            List<Employee> descansan = new ArrayList<>(ordenSemana.subList(trabajadoresPorSemana, ordenSemana.size()));
+
+            for (Task tarea : tareasPriorizadas) {
+                
+                List<Employee> autorizados = disponiblesParaAsignar.stream()
+                        .filter(emp -> isAuthorized(emp, tarea))
+                        .collect(Collectors.toList());
+
+                if (autorizados.isEmpty()) continue;
+
+                // Restricción Corto Plazo: NO hacer la misma tarea 2 semanas seguidas
+                List<Employee> noRepetidores = autorizados.stream()
+                        .filter(emp -> {
+                            Long idUltima = ultimaTareaPorEmpleado.get(emp.getId());
+                            return idUltima == null || !idUltima.equals(tarea.getId());
+                        })
+                        .collect(Collectors.toList());
+
+                List<Employee> candidatosFinales = noRepetidores.isEmpty() ? autorizados : noRepetidores;
+
+                // Restricción Largo Plazo: Elegir al que NO la ha hecho en este ciclo
+                candidatosFinales.sort((e1, e2) -> {
+                    Set<Long> hist1 = tareasRealizadasPorEmpleado.getOrDefault(e1.getId(), new HashSet<>());
+                    Set<Long> hist2 = tareasRealizadasPorEmpleado.getOrDefault(e2.getId(), new HashSet<>());
+
+                    boolean e1YaLaHizo = hist1.contains(tarea.getId());
+                    boolean e2YaLaHizo = hist2.contains(tarea.getId());
+
+                    if (e1YaLaHizo && !e2YaLaHizo) return 1;
+                    if (!e1YaLaHizo && e2YaLaHizo) return -1;
+
+                    return Integer.compare(hist1.size(), hist2.size());
+                });
+
+                Employee elegido = candidatosFinales.get(0);
+
+                Assignment asignacion = new Assignment();
+                asignacion.setEmployee(elegido);
+                asignacion.setPayroll(payroll);
+                asignacion.setWeekNumber(semana);
+                asignacion.setTask(tarea);
+                asignacion.setStatus(AssignmentStatus.ASSIGNED);
+                assignmentRepository.save(asignacion);
+
+                ultimaTareaPorEmpleado.put(elegido.getId(), tarea.getId());
+                
+                Set<Long> historial = tareasRealizadasPorEmpleado.getOrDefault(elegido.getId(), new HashSet<>());
+                
+                // Si se vio forzado a repetir, reseteamos su ciclo para destrabarlo.
+                if (historial.contains(tarea.getId())) {
+                    historial.clear();
+                }
+                
+                historial.add(tarea.getId());
+                
+                // Reset normal por si logra el ciclo perfecto
+                long totalAutorizadas = tareas.stream().filter(t -> isAuthorized(elegido, t)).count();
+                if (historial.size() >= totalAutorizadas) {
+                    historial.clear();
+                }
+                
+                tareasRealizadasPorEmpleado.put(elegido.getId(), historial);
+                disponiblesParaAsignar.remove(elegido);
+            }
+
+            for (Employee emp : disponiblesParaAsignar) {
+                assignmentRepository.save(asignarDescanso(emp, payroll, semana));
+            }
+            for (Employee emp : descansan) {
+                assignmentRepository.save(asignarDescanso(emp, payroll, semana));
+            }
+        }
+
+        return payroll;
+    }
+
+    private boolean isAuthorized(Employee emp, Task task) {
+        if (task.getType() == TaskType.GENERAL) return true;
+        if (task.getType() == TaskType.SPECIFIC) {
+            return task.getAuthorizedAreas().stream()
+                    .anyMatch(ta -> ta.getArea().getId().equals(emp.getArea().getId()));
+        }
+        return false;
+    }
+
+    private Assignment asignarDescanso(Employee employee, Payroll payroll, int semana) {
+        Assignment asignacionDescanso = new Assignment();
+        asignacionDescanso.setEmployee(employee);
+        asignacionDescanso.setPayroll(payroll);
+        asignacionDescanso.setWeekNumber(semana);
+        asignacionDescanso.setTask(null);
+        asignacionDescanso.setStatus(AssignmentStatus.REST);
+        return asignacionDescanso;
+    }
+}/*18/05/2026/*package com.taskapp.task_scheduler.service;
+
+import org.springframework.stereotype.Service;
+import lombok.RequiredArgsConstructor;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDate;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import com.taskapp.task_scheduler.model.*;
+import com.taskapp.task_scheduler.repository.*;
+
+@Service
+@RequiredArgsConstructor
+public class AssignmentAlgorithm {
+
+    private final FeasibilityValidator validator;
+    private final EmployeeRepository employeeRepository;
+    private final TaskRepository taskRepository;
+    private final PayrollRepository payrollRepository;
+    private final AssignmentRepository assignmentRepository;
+
+    @Transactional
+    public Payroll generatePayroll(int totalWeeks) {
+        List<Employee> empleadosRaw = employeeRepository.findByActiveTrue();
+        List<Task> tareas = taskRepository.findAll();
+
+        validator.validar(empleadosRaw, tareas);
+
+        payrollRepository.findByStatus(PayrollStatus.ACTIVE).ifPresent(p -> {
+            p.setStatus(PayrollStatus.ARCHIVED);
+            payrollRepository.save(p);
+        });
+
+        Payroll payroll = new Payroll();
+        payroll.setStatus(PayrollStatus.ACTIVE);
+        payroll.setStartDate(LocalDate.now());
+        payroll.setEndDate(LocalDate.now().plusWeeks(totalWeeks));
+        payroll = payrollRepository.save(payroll);
+
+        // Intercalar áreas (Round-Robin) para evitar que descansen todos los de un área juntos
+        Map<Long, List<Employee>> porArea = empleadosRaw.stream().collect(Collectors.groupingBy(e -> e.getArea().getId()));
+        List<Employee> empleados = new ArrayList<>();
+        boolean quedanEmpleados;
+        do {
+            quedanEmpleados = false;
+            for (List<Employee> listaArea : porArea.values()) {
+                if (!listaArea.isEmpty()) {
+                    empleados.add(listaArea.remove(0));
+                    quedanEmpleados = true;
+                }
+            }
+        } while (quedanEmpleados);
+
+        Map<Long, Long> ultimaTareaPorEmpleado = new HashMap<>();
+        
+        // LA LISTA DE CHEQUEO (El Ciclo)
+        Map<Long, Set<Long>> tareasRealizadasPorEmpleado = new HashMap<>();
+        
+        int trabajadoresPorSemana = Math.min(empleados.size(), tareas.size());
+        int descansanCount = Math.max(1, empleados.size() - trabajadoresPorSemana);
+
+        for (int semana = 1; semana <= totalWeeks; semana++) {
+            
+            int indiceInicio = ((semana - 1) * descansanCount) % empleados.size();
+            List<Employee> ordenSemana = new ArrayList<>();
+            for (int i = 0; i < empleados.size(); i++) {
+                ordenSemana.add(empleados.get((indiceInicio + i) % empleados.size()));
+            }
+
+            List<Employee> disponiblesParaAsignar = new ArrayList<>(ordenSemana.subList(0, trabajadoresPorSemana));
+            List<Employee> descansan = new ArrayList<>(ordenSemana.subList(trabajadoresPorSemana, ordenSemana.size()));
+
+            List<Task> tareasPendientes = new ArrayList<>(tareas);
+
+            // Bucle dinámico: Asignamos tareas una por una, priorizando la más difícil de llenar
+            while (!tareasPendientes.isEmpty() && !disponiblesParaAsignar.isEmpty()) {
+                
+                // 🔥 INTELIGENCIA DINÁMICA: Ordenar tareas por quién tiene menos empleados legales disponibles
+                tareasPendientes.sort((t1, t2) -> {
+                    long validos1 = disponiblesParaAsignar.stream()
+                        .filter(emp -> isAuthorized(emp, t1))
+                        .filter(emp -> {
+                            Long ult = ultimaTareaPorEmpleado.get(emp.getId());
+                            return ult == null || !ult.equals(t1.getId());
+                        }).count();
+                        
+                    long validos2 = disponiblesParaAsignar.stream()
+                        .filter(emp -> isAuthorized(emp, t2))
+                        .filter(emp -> {
+                            Long ult = ultimaTareaPorEmpleado.get(emp.getId());
+                            return ult == null || !ult.equals(t2.getId());
+                        }).count();
+                        
+                    int cmp = Long.compare(validos1, validos2);
+                    if (cmp != 0) return cmp; // La tarea con MENOS personas válidas se asigna primero
+                    
+                    // Desempate: Las tareas específicas siempre van primero
+                    if (t1.getType() == TaskType.SPECIFIC && t2.getType() != TaskType.SPECIFIC) return -1;
+                    if (t1.getType() != TaskType.SPECIFIC && t2.getType() == TaskType.SPECIFIC) return 1;
+                    return 0;
+                });
+
+                Task tarea = tareasPendientes.remove(0);
+                
+                List<Employee> autorizados = disponiblesParaAsignar.stream()
+                        .filter(emp -> isAuthorized(emp, tarea))
+                        .collect(Collectors.toList());
+
+                if (autorizados.isEmpty()) continue;
+
+                // Restricción: No repetir la misma tarea de la semana pasada
+                List<Employee> noRepetidores = autorizados.stream()
+                        .filter(emp -> {
+                            Long idUltima = ultimaTareaPorEmpleado.get(emp.getId());
+                            return idUltima == null || !idUltima.equals(tarea.getId());
+                        })
+                        .collect(Collectors.toList());
+
+                List<Employee> candidatosFinales = noRepetidores.isEmpty() ? autorizados : noRepetidores;
+
+                // LÓGICA DE LA LISTA DE CHEQUEO: Priorizar a los que NO la han hecho
+                candidatosFinales.sort((e1, e2) -> {
+                    Set<Long> hist1 = tareasRealizadasPorEmpleado.getOrDefault(e1.getId(), new HashSet<>());
+                    Set<Long> hist2 = tareasRealizadasPorEmpleado.getOrDefault(e2.getId(), new HashSet<>());
+
+                    boolean e1YaLaHizo = hist1.contains(tarea.getId());
+                    boolean e2YaLaHizo = hist2.contains(tarea.getId());
+
+                    if (!e1YaLaHizo && e2YaLaHizo) return -1;
+                    if (e1YaLaHizo && !e2YaLaHizo) return 1;
+
+                    // Desempate: El que tenga la lista más vacía elige primero
+                    return Integer.compare(hist1.size(), hist2.size());
+                });
+
+                Employee elegido = candidatosFinales.get(0);
+
+                Assignment asignacion = new Assignment();
+                asignacion.setEmployee(elegido);
+                asignacion.setPayroll(payroll);
+                asignacion.setWeekNumber(semana);
+                asignacion.setTask(tarea);
+                asignacion.setStatus(AssignmentStatus.ASSIGNED);
+                assignmentRepository.save(asignacion);
+
+                // --- ACTUALIZAR EL CICLO DE TAREAS ---
+                ultimaTareaPorEmpleado.put(elegido.getId(), tarea.getId());
+                
+                Set<Long> historial = tareasRealizadasPorEmpleado.getOrDefault(elegido.getId(), new HashSet<>());
+                historial.add(tarea.getId());
+                
+                // Reinicio limpio solo cuando hizo todas
+                long totalAutorizadas = tareas.stream().filter(t -> isAuthorized(elegido, t)).count();
+                if (historial.size() >= totalAutorizadas) {
+                    historial.clear();
+                }
+                
+                tareasRealizadasPorEmpleado.put(elegido.getId(), historial);
+                disponiblesParaAsignar.remove(elegido);
+            }
+
+            for (Employee emp : disponiblesParaAsignar) {
+                assignmentRepository.save(asignarDescanso(emp, payroll, semana));
+            }
+            for (Employee emp : descansan) {
+                assignmentRepository.save(asignarDescanso(emp, payroll, semana));
+            }
+        }
+
+        return payroll;
+    }
+
+    private boolean isAuthorized(Employee emp, Task task) {
+        if (task.getType() == TaskType.GENERAL) return true;
+        if (task.getType() == TaskType.SPECIFIC) {
+            return task.getAuthorizedAreas().stream()
+                    .anyMatch(ta -> ta.getArea().getId().equals(emp.getArea().getId()));
+        }
+        return false;
+    }
+
+    private Assignment asignarDescanso(Employee employee, Payroll payroll, int semana) {
+        Assignment asignacionDescanso = new Assignment();
+        asignacionDescanso.setEmployee(employee);
+        asignacionDescanso.setPayroll(payroll);
+        asignacionDescanso.setWeekNumber(semana);
+        asignacionDescanso.setTask(null);
+        asignacionDescanso.setStatus(AssignmentStatus.REST);
+        return asignacionDescanso;
+    }
+}*/spring.application.name=task-scheduler
+# Configuración de H2 (Base de datos en memoria para desarrollo local)
+spring.datasource.url=jdbc:h2:file:./data/taskdb
+
+spring.datasource.driverClassName=org.h2.Driver
+spring.datasource.username=sa
+spring.datasource.password=
+spring.jpa.database-platform=org.hibernate.dialect.H2Dialect
+
+# Para que Hibernate cree las tablas automáticamente según tus entidades
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true
+
+# Habilitar la consola web de H2 para ver tus tablas (opcional pero muy útil)
+spring.h2.console.enabled=true
+spring.h2.console.path=/h2-console
+# Thymeleaf
+spring.thymeleaf.cache=false
+spring.thymeleaf.mode=HTML
+
+# Formato de fecha para JPA
+spring.jpa.properties.hibernate.jdbc.time_zone=UTC
