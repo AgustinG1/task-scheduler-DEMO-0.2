@@ -13,29 +13,40 @@
         </div>
 
         <div class="card-dark mb-4 fade-up fade-up-1">
-            <div class="card-body-dark d-flex align-items-center justify-content-between flex-wrap gap-3">
+            <div class="card-body-dark d-flex flex-column gap-3">
                 
-                <form th:action="@{/payroll/generar}" method="post" class="form-dark d-flex align-items-center gap-3 m-0">
+                <form th:action="@{/payroll/generar}" method="post" 
+                    class="form-dark d-flex flex-wrap align-items-center gap-2 m-0 w-100">
                     
                     <label class="form-label m-0">Generar para Sucursal:</label>
-                    <select name="teamId" class="form-control" style="width: 250px;" required>
+                    <select name="teamId" class="form-control flex-grow-1" style="min-width: 180px;" required>
                         <option value="" disabled selected>Selecciona un equipo...</option>
-                        <option th:each="equipo : ${todosLosEquipos}" th:value="${equipo.id}" th:text="${equipo.name}"></option>
+                        <option th:each="equipo : ${todosLosEquipos}" 
+                                th:value="${equipo.id}" 
+                                th:text="${equipo.name}"></option>
                     </select>
 
-                    <label class="form-label m-0 ms-2" style="white-space: nowrap;">Duración:</label>
-                    <input type="number" name="semanas" value="16" min="1" max="52" class="form-control" style="width: 80px;"/>
+                    <label class="form-label m-0" style="white-space: nowrap;">Duración:</label>
+                    <input type="number" name="semanas" value="16" min="1" max="52" 
+                        class="form-control" style="width: 80px; min-width: 80px;"/>
                     <span class="form-label m-0">semanas</span>
                     
-                    <button type="submit" class="btn-primary-dark ms-3">
+                    <button type="submit" class="btn-primary-dark">
                         <i class="bi bi-magic me-1"></i> Ejecutar Motor
                     </button>
                 </form>
 
-                <div th:if="${planilla != null}" class="d-flex gap-2">
-                    <span class="badge-general"><i class="bi bi-calendar-event me-1"></i> Inicio: <span th:text="${planilla.startDate}"></span></span>
-                    <span class="badge-general"><i class="bi bi-calendar-check me-1"></i> Fin: <span th:text="${planilla.endDate}"></span></span>
+                <div th:if="${planilla != null}" class="d-flex flex-wrap gap-2">
+                    <span class="badge-general">
+                        <i class="bi bi-calendar-event me-1"></i> Inicio: 
+                        <span th:text="${planilla.startDate}"></span>
+                    </span>
+                    <span class="badge-general">
+                        <i class="bi bi-calendar-check me-1"></i> Fin: 
+                        <span th:text="${planilla.endDate}"></span>
+                    </span>
                 </div>
+
             </div>
         </div>
 
