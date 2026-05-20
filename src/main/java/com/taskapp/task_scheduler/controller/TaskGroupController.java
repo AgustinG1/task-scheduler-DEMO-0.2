@@ -4,6 +4,8 @@ import com.taskapp.task_scheduler.model.TaskGroup;
 import com.taskapp.task_scheduler.model.Task;
 import com.taskapp.task_scheduler.repository.TaskGroupRepository;
 import com.taskapp.task_scheduler.repository.TaskRepository;
+
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -36,11 +38,19 @@ public class TaskGroupController {
 
     // 3. Eliminar un catálogo entero
     @GetMapping("/eliminar/{id}")
-    public String eliminarCatalogo(@PathVariable Long id) {
-        taskGroupRepository.deleteById(id);
-        return "redirect:/task-groups";
-    }
+        @Transactional
+        public String eliminarCatalogo(@PathVariable Long id) {
+            TaskGroup catalogo = taskGroupRepository.findById(id)
+            .orElseThrow(() -> new IllegalArgumentException("ID inválido: " + id));
 
+    // Limpiar relaciones antes de borrar
+    catalogo.getTasks().clear();
+    catalogo.getTeams().forEach(team -> team.getTaskGroups().remove(catalogo));
+    catalogo.getTeams().clear();
+    
+    taskGroupRepository.delete(catalogo);
+    return "redirect:/task-groups";
+}
     // 4. Entrar a editar el catálogo para meterle tareas
     @GetMapping("/editar/{id}")
     public String editarCatalogo(@PathVariable Long id, Model model) {
