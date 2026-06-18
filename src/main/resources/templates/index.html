@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout(~{::#page-content}, 'Inicio')}">
+<body>
+
+<div id="page-content" th:fragment="content">
+    <div class="container-fluid p-0">
+        <div class="page-header fade-up mb-4">
+            <div>
+                <h1 class="page-title">Panel principal</h1>
+                <p class="page-subtitle">Accede rápido a las áreas operativas y administra tareas, equipos y planillas desde un solo lugar.</p>
+            </div>
+        </div>
+
+        <div class="row g-4 mb-4 fade-up fade-up-1">
+            <div class="col-xl-4 col-md-6">
+                <div class="stat-card h-100">
+                    <div class="stat-label">Módulos activos</div>
+                    <div class="stat-value" th:text="${modulosConDatos}">0</div>
+                    <p class="mt-2 mb-0" style="color: var(--text-secondary); font-size: 13px;">Cantidad de módulos que ya tienen información cargada.</p>
+                </div>
+            </div>
+            <div class="col-xl-4 col-md-6">
+                <div class="stat-card h-100">
+                    <div class="stat-label">Flujo operativo</div>
+                    <div class="stat-value">24/7</div>
+                    <p class="mt-2 mb-0" style="color: var(--text-secondary); font-size: 13px;">Diseñado para organizar turnos y asignaciones sin perder trazabilidad.</p>
+                </div>
+            </div>
+            <div class="col-xl-4 col-md-12">
+                <div class="stat-card h-100">
+                    <div class="stat-label">Acceso rápido</div>
+                    <div class="stat-value">1 click</div>
+                    <p class="mt-2 mb-0" style="color: var(--text-secondary); font-size: 13px;">Entra a cualquier módulo desde la barra superior o con los accesos directos.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-dark mb-4 fade-up fade-up-2">
+            <div class="card-header-dark">
+                <span class="card-title-dark"><i class="bi bi-lightning-charge me-2" style="color:var(--accent)"></i>Accesos directos</span>
+                <a th:href="@{/task-groups}" class="btn-ghost"><i class="bi bi-arrow-right"></i> Abrir catálogos</a>
+            </div>
+            <div class="card-body-dark">
+                <div class="row g-3">
+                    <div class="col-xl-4 col-md-6">
+                        <div class="card-dark h-100" style="background: var(--bg-surface);">
+                            <div class="card-body-dark">
+                                <div class="d-flex align-items-center gap-2 mb-2" style="color: var(--text-primary); font-weight: 700;">
+                                    <i class="bi bi-grid-3x3-gap" style="color:var(--accent)"></i>
+                                    <span>Áreas</span>
+                                </div>
+                                <p class="mb-3" style="color: var(--text-secondary); font-size: 13px; line-height: 1.5;">Define las zonas operativas y la estructura base.</p>
+                                <a th:href="@{/areas}" class="btn-primary-dark w-100 justify-content-center">Abrir módulo</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-4 col-md-6">
+                        <div class="card-dark h-100" style="background: var(--bg-surface);">
+                            <div class="card-body-dark">
+                                <div class="d-flex align-items-center gap-2 mb-2" style="color: var(--text-primary); font-weight: 700;">
+                                    <i class="bi bi-list-check" style="color:var(--accent)"></i>
+                                    <span>Tareas</span>
+                                </div>
+                                <p class="mb-3" style="color: var(--text-secondary); font-size: 13px; line-height: 1.5;">Gestiona las tareas que se asignan a equipos y empleados.</p>
+                                <a th:href="@{/tasks}" class="btn-primary-dark w-100 justify-content-center">Abrir módulo</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-4 col-md-6">
+                        <div class="card-dark h-100" style="background: var(--bg-surface);">
+                            <div class="card-body-dark">
+                                <div class="d-flex align-items-center gap-2 mb-2" style="color: var(--text-primary); font-weight: 700;">
+                                    <i class="bi bi-people" style="color:var(--accent)"></i>
+                                    <span>Empleados</span>
+                                </div>
+                                <p class="mb-3" style="color: var(--text-secondary); font-size: 13px; line-height: 1.5;">Administra el personal disponible para los turnos.</p>
+                                <a th:href="@{/employees}" class="btn-primary-dark w-100 justify-content-center">Abrir módulo</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-4 col-md-6">
+                        <div class="card-dark h-100" style="background: var(--bg-surface);">
+                            <div class="card-body-dark">
+                                <div class="d-flex align-items-center gap-2 mb-2" style="color: var(--text-primary); font-weight: 700;">
+                                    <i class="bi bi-box-seam" style="color:var(--accent)"></i>
+                                    <span>Catálogos</span>
+                                </div>
+                                <p class="mb-3" style="color: var(--text-secondary); font-size: 13px; line-height: 1.5;">Agrupa tareas en módulos reutilizables.</p>
+                                <a th:href="@{/task-groups}" class="btn-primary-dark w-100 justify-content-center">Abrir módulo</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-4 col-md-6">
+                        <div class="card-dark h-100" style="background: var(--bg-surface);">
+                            <div class="card-body-dark">
+                                <div class="d-flex align-items-center gap-2 mb-2" style="color: var(--text-primary); font-weight: 700;">
+                                    <i class="bi bi-building" style="color:var(--accent)"></i>
+                                    <span>Equipos</span>
+                                </div>
+                                <p class="mb-3" style="color: var(--text-secondary); font-size: 13px; line-height: 1.5;">Organiza los equipos y sus catálogos asociados.</p>
+                                <a th:href="@{/teams}" class="btn-primary-dark w-100 justify-content-center">Abrir módulo</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-4 col-md-6">
+                        <div class="card-dark h-100" style="background: var(--bg-surface);">
+                            <div class="card-body-dark">
+                                <div class="d-flex align-items-center gap-2 mb-2" style="color: var(--text-primary); font-weight: 700;">
+                                    <i class="bi bi-calendar3" style="color:var(--accent)"></i>
+                                    <span>Planilla</span>
+                                </div>
+                                <p class="mb-3" style="color: var(--text-secondary); font-size: 13px; line-height: 1.5;">Consulta y genera la información de nómina.</p>
+                                <a th:href="@{/payroll}" class="btn-primary-dark w-100 justify-content-center">Abrir módulo</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-dark fade-up fade-up-3">
+            <div class="card-header-dark">
+                <span class="card-title-dark"><i class="bi bi-clipboard-data me-2" style="color:var(--accent)"></i>Qué puedes hacer aquí</span>
+            </div>
+            <div class="card-body-dark">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <div class="stat-card h-100">
+                            <div class="stat-label">Catálogos</div>
+                            <p class="mb-0" style="color: var(--text-secondary); font-size: 13px;">Crea módulos de tareas y reutilízalos en varios equipos.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="stat-card h-100">
+                            <div class="stat-label">Asignaciones</div>
+                            <p class="mb-0" style="color: var(--text-secondary); font-size: 13px;">Relaciona personal, equipos y tareas sin salir del sistema.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="stat-card h-100">
+                            <div class="stat-label">Planilla</div>
+                            <p class="mb-0" style="color: var(--text-secondary); font-size: 13px;">Consulta historial y exporta información de nómina cuando la necesites.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

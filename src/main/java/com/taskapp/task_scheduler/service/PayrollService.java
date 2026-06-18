@@ -20,9 +20,10 @@ public class PayrollService {
     private final PayrollRepository payrollRepository;
     private final AssignmentRepository assignmentRepository; // Añadido para poder borrar los turnos vinculados
 
-    // 1. Traer la planilla activa (usamos el método que creaste en el repositorio)
+    // 1. Traer la planilla activa (toma la primera si hay varias)
     public Optional<Payroll> getActivePayroll() {
-        return payrollRepository.findByStatus(PayrollStatus.ACTIVE);
+        List<Payroll> activas = payrollRepository.findByStatus(PayrollStatus.ACTIVE);
+        return activas.isEmpty() ? Optional.empty() : Optional.of(activas.get(0));
     }
 
     // 2. Traer todo el historial de planillas
@@ -30,14 +31,11 @@ public class PayrollService {
         return payrollRepository.findAll();
     }
 
-    // 3. Archivar la actual (si existe) y crear una nueva
+    // 3. Archivar TODAS las activas (si existen) y crear una nueva
     public Payroll archiveCurrentAndCreate() {
-        // Paso A: Buscamos si hay una planilla activa en este momento
-        Optional<Payroll> planillaActivaOpt = getActivePayroll();
-        
-        // Si existe, la "archivamos" para que no moleste a la nueva
-        if (planillaActivaOpt.isPresent()) {
-            Payroll planillaActiva = planillaActivaOpt.get();
+        // Paso A: Archivamos TODAS las planillas activas (por seguridad)
+        List<Payroll> activas = payrollRepository.findByStatus(PayrollStatus.ACTIVE);
+        for (Payroll planillaActiva : activas) {
             planillaActiva.setStatus(PayrollStatus.ARCHIVED);
             payrollRepository.save(planillaActiva);
         }
@@ -64,4 +62,4 @@ public class PayrollService {
         payrollRepository.deleteById(id);
     }
     
-}
+}

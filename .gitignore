@@ -1,9 +1,10 @@
 HELP.md
+analysis_results.md
 target/
 .mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
-
+.env.example
 ### STS ###
 .apt_generated
 .classpath
@@ -31,3 +32,6 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Environment variables ###
+.env

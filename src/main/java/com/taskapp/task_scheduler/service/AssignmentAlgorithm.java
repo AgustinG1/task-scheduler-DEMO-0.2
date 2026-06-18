@@ -41,7 +41,7 @@ public class AssignmentAlgorithm {
 
         validator.validar(empleadosRaw, tareas);
 
-        payrollRepository.findByStatus(PayrollStatus.ACTIVE).ifPresent(p -> {
+        payrollRepository.findByStatus(PayrollStatus.ACTIVE).forEach(p -> {
             p.setStatus(PayrollStatus.ARCHIVED);
             payrollRepository.save(p);
         });
