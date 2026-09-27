@@ -12,6 +12,8 @@
             <p class="page-subtitle">Matriz de asignación semanal generada por equipo</p>
         </div>
 
+        <div th:if="${error}" class="alert alert-danger" role="alert" th:text="${error}"></div>
+
         <div class="card-dark mb-4 fade-up fade-up-1">
             <div class="card-body-dark d-flex flex-column gap-3">
                 

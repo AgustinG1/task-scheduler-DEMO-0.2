@@ -3,6 +3,7 @@ package com.taskapp.task_scheduler.controller;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -81,8 +82,13 @@ public class PayrollController {
     }
 
     @PostMapping("/generar")
-    public String generar(@RequestParam Long teamId, @RequestParam(defaultValue = "16") int semanas) {
-        assignmentAlgorithm.generatePayroll(semanas, teamId);
+    public String generar(@RequestParam Long teamId, @RequestParam(defaultValue = "16") int semanas,
+            RedirectAttributes redirectAttributes) {
+        try {
+            assignmentAlgorithm.generatePayroll(semanas, teamId);
+        } catch (IllegalArgumentException | IllegalStateException ex) {
+            redirectAttributes.addFlashAttribute("error", ex.getMessage());
+        }
         return "redirect:/payroll";
     }
 
