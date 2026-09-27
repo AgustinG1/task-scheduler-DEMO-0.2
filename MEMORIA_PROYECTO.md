@@ -8,6 +8,8 @@
 
 **Registro permanente de cambios:** cada evolución funcional, de pruebas o infraestructura debe añadirse a [docs/EVOLUCION.md](docs/EVOLUCION.md), indicando su validación y estado de commit/despliegue. El 27 de septiembre de 2026 se hizo configurable el entorno Docker Compose local; `pom.xml` ya contenía una sola dependencia `mysql-connector-j`, por lo que se conservó esa declaración necesaria.
 
+**Entidades JPA ajustadas el 27 de septiembre de 2026:** las ocho entidades usan `@Getter` y `@Setter` en lugar de `@Data`, de modo que Lombok ya no incorpora asociaciones bidireccionales en `equals`, `hashCode` o `toString`. La clave compuesta `TaskAreaId` conserva `@EqualsAndHashCode`, requerido para su identidad JPA. La suite completa continúa en 21 pruebas correctas y 0 fallidas.
+
 Revisión: 26 de septiembre de 2026. Idioma de trabajo: español.
 
 ## Alcance y referencia verificada
@@ -45,7 +47,7 @@ Recorrido práctico: crear áreas → registrar empleados en sus áreas → crea
 | Persistencia | Spring Data JPA; Hibernate ORM 7.2.12.Final | Repositorios y relaciones |
 | Plantillas | Thymeleaf 3.1.5.RELEASE | HTML dinámico; integración `thymeleaf-spring6` resuelta por Boot |
 | Validación | Jakarta Bean Validation y starter de validación | Restricciones declaradas en entidades |
-| Código generado | Lombok 1.18.46 | Constructores, getters, setters, equals/hashCode/toString |
+| Código generado | Lombok 1.18.46 | Constructores, getters y setters; igualdad/hash solo en la clave compuesta |
 | Base local | H2 2.4.240 en memoria | Desarrollo y prueba de contexto |
 | Base Docker | MySQL 8.4 | Servicio persistente de la demo |
 | Conector MySQL | mysql-connector-j 9.7.0 | Conexión a MySQL |
@@ -240,7 +242,7 @@ La base histórica H2 contiene 13 tablas: 3 áreas, 15 empleados, 13 tareas, 2 e
 | Validación y errores | Restricciones de entidad presentes, sin `@Valid`/`BindingResult` en los controladores ni errores de negocio presentados de forma controlada |
 | Acceso abierto | No hay autenticación, roles ni Spring Security; el CRUD local respondió sin sesión |
 | Mutaciones por GET | Borrados y desactivación usan enlaces GET con confirmación JavaScript en varias pantallas |
-| JPA y Lombok | `@Data` incluye asociaciones en igualdad/hash/toString; merece revisión por ciclos, carga de relaciones e identidad; no hubo StackOverflow en las pruebas HTTP realizadas |
+| JPA y Lombok | Resuelto el 27 de septiembre de 2026: entidades con `@Getter`/`@Setter`; `TaskAreaId` conserva igualdad/hash de clave compuesta |
 | Escalabilidad | Consultas completas, guardados individuales, ordenación repetida y exploración de asignaciones desde las plantillas |
 | Documentación y UI | Informe antiguo obsoleto; descarga rotulada CSV; tarjetas móviles con etiquetas incompletas |
 

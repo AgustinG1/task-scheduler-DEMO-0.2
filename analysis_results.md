@@ -293,7 +293,7 @@ templates/
 
 14. **Falta de tests** — El directorio `src/test/java` existe pero no se observan archivos de test.
 
-15. **`@Data` de Lombok en entidades JPA** — Usar `@Data` en entidades con relaciones bidireccionales puede causar **StackOverflowError** en `toString()`, `hashCode()` y `equals()` por referencias circulares. Se recomienda usar `@Getter`, `@Setter` y definir `equals`/`hashCode` manualmente.
+15. **Resuelto el 27 de septiembre de 2026 — Lombok en entidades JPA**: las entidades usan `@Getter` y `@Setter`, por lo que las asociaciones ya no participan automáticamente en `toString()`, `hashCode()` ni `equals()`. `TaskAreaId` conserva `@EqualsAndHashCode` por ser una clave compuesta.
 
 ---
 
@@ -347,7 +347,7 @@ sequenceDiagram
 3. **Implementar DTOs** para separar el modelo de datos de las vistas
 4. **Agregar `@ControllerAdvice`** con páginas de error personalizadas
 5. **Reemplazar `System.out.println`** por SLF4J Logger
-6. **Usar `@Getter`/`@Setter`** en lugar de `@Data` en entidades JPA
+6. **Completado:** usar `@Getter`/`@Setter` en lugar de `@Data` en entidades JPA
 7. **Escribir tests unitarios** para el `AssignmentAlgorithm` (es la lógica más crítica)
 8. **Completado:** `docker-compose.yml` con servicio MySQL y la app
 9. **Completado:** verificar que exista una única dependencia `mysql-connector-j`

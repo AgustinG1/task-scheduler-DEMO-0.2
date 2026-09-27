@@ -2,6 +2,17 @@
 
 Este registro conserva cada etapa funcional del programa. Cada entrada indica el comportamiento añadido o corregido, los archivos principales, la comprobación realizada y si el cambio llegó a GitHub o producción. No debe contener contraseñas, cadenas de conexión completas ni otros secretos.
 
+## 27 de septiembre de 2026 — Lombok seguro en entidades JPA
+
+Estado: cambio preparado y verificado localmente; se registra en el commit que contiene esta entrada. No se ha enviado a GitHub ni desplegado en Render.
+
+- Se reemplazó `@Data` por `@Getter` y `@Setter` en las ocho entidades de `model/`.
+- Se conservaron `@NoArgsConstructor` y `@AllArgsConstructor`, por lo que no cambió la forma de construir las entidades.
+- Las relaciones JPA dejaron de formar parte automáticamente de `equals`, `hashCode` y `toString`, evitando recursión entre asociaciones bidireccionales y cargas accidentales de colecciones.
+- `TaskAreaId`, como clave compuesta `@Embeddable`, conserva `@EqualsAndHashCode` además de getters y setters para cumplir el contrato de identidad requerido por JPA.
+- Se actualizaron `MEMORIA_PROYECTO.md` y `analysis_results.md` para marcar el hallazgo como resuelto.
+- Verificación: `mvn test -B -ntp`, 21 pruebas correctas, 0 fallidas; búsqueda del paquete `model` sin usos restantes de `@Data`; `git diff --check` sin errores.
+
 ## 27 de septiembre de 2026 — Entorno Docker Compose reproducible
 
 Estado: cambio preparado y verificado localmente; se registra en el commit que contiene esta entrada. No se ha enviado a GitHub ni desplegado en Render.
