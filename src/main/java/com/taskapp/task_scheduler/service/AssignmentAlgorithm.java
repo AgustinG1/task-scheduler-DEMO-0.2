@@ -91,13 +91,14 @@ public class AssignmentAlgorithm {
 
             List<Task> tareasPendientes = new ArrayList<>(tareas);
             Collections.shuffle(tareasPendientes);
-            // Priorizar tareas con pocos candidatos, como en el algoritmo original.
+            // Priorizar tareas con pocos candidatos ideales, sin adelantar una tarea
+            // que obligaría a repetir cuando todavía existe una alternativa de ciclo.
             tareasPendientes.sort(Comparator
-                    .comparingLong((Task tarea) -> ordenSemana.stream()
-                            .filter(emp -> prioridadCandidato(emp, tarea, ultimaTareaPorEmpleado,
-                                    tareasRealizadasPorEmpleado) == 0).count())
-                    .thenComparingLong(tarea -> ordenSemana.stream()
-                            .filter(emp -> isAuthorized(emp, tarea)).count())
+                    .comparingInt((Task tarea) -> prioridadTarea(tarea, ordenSemana,
+                            ultimaTareaPorEmpleado, tareasRealizadasPorEmpleado))
+                    .thenComparingLong(tarea -> cantidadCandidatosIdeales(tarea, ordenSemana,
+                            ultimaTareaPorEmpleado, tareasRealizadasPorEmpleado))
+                    .thenComparingLong(tarea -> cantidadCandidatosAutorizados(tarea, ordenSemana))
                     .thenComparing(tarea -> tarea.getType() == TaskType.SPECIFIC ? 0 : 1));
 
             // Elegir descansos después de comprobar todas las personas autorizadas.
@@ -134,6 +135,30 @@ public class AssignmentAlgorithm {
         }
 
         return payroll;
+    }
+
+    private int prioridadTarea(Task tarea, List<Employee> empleados,
+            Map<Long, Long> ultimaTareaPorEmpleado,
+            Map<Long, Set<Long>> tareasRealizadasPorEmpleado) {
+        long autorizados = cantidadCandidatosAutorizados(tarea, empleados);
+        if (autorizados == 0) return 2;
+
+        long ideales = cantidadCandidatosIdeales(tarea, empleados, ultimaTareaPorEmpleado,
+                tareasRealizadasPorEmpleado);
+        return ideales > 0 ? 0 : 1;
+    }
+
+    private long cantidadCandidatosIdeales(Task tarea, List<Employee> empleados,
+            Map<Long, Long> ultimaTareaPorEmpleado,
+            Map<Long, Set<Long>> tareasRealizadasPorEmpleado) {
+        return empleados.stream()
+                .filter(emp -> prioridadCandidato(emp, tarea, ultimaTareaPorEmpleado,
+                        tareasRealizadasPorEmpleado) == 0)
+                .count();
+    }
+
+    private long cantidadCandidatosAutorizados(Task tarea, List<Employee> empleados) {
+        return empleados.stream().filter(emp -> isAuthorized(emp, tarea)).count();
     }
 
     private boolean buscarAsignacion(Task tarea, List<Employee> ordenSemana, Map<Long, Task> tareaPorEmpleado,

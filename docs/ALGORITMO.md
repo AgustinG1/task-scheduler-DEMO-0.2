@@ -12,7 +12,9 @@ Agrupa las personas por área, baraja cada grupo e intercala una persona de cada
 
 ## Prioridad de tareas y candidatos
 
-Baraja las tareas y luego ordena por: menos candidatos ideales, menos candidatos autorizados y tareas específicas antes de generales. Un candidato ideal está autorizado, no hizo esa tarea en su última asignación y todavía no la hizo en su ciclo actual.
+Baraja las tareas y las divide en tres niveles de prioridad: (1) tareas con al menos un candidato ideal, (2) tareas autorizadas que requieren relajar el ciclo y (3) tareas sin personas autorizadas. Dentro del primer nivel ordena por menor cantidad de candidatos ideales; después desempata por menor cantidad de candidatos autorizados y por tareas específicas antes de generales. Un candidato ideal está autorizado, no hizo esa tarea en su última asignación y todavía no la hizo en su ciclo actual.
+
+Separar esos niveles evita que una tarea con cero candidatos ideales se adelante a otra que permite continuar el ciclo. Por ejemplo, una persona con dos tareas generales distintas recibe la alternativa disponible antes de repetir su última tarea. Si ninguna tarea tiene candidatos ideales, las capas de relajación siguen permitiendo generar la mejor cobertura posible.
 
 Para cada tarea, ordena a las personas autorizadas según las tres capas originales: (1) ideal, (2) no repite la última tarea aunque ya esté en su ciclo y (3) cualquier persona autorizada. Desempata por menor cantidad de tareas en el ciclo y por el orden rotado de la semana.
 
@@ -28,4 +30,4 @@ La operación completa usa `@Transactional`. Un fallo revierte el archivado y la
 
 ## Comprobación
 
-`AssignmentAlgorithmIntegrationTests` verifica autorización por área, una asignación por persona y semana, rotación de descanso, cobertura de una tarea específica, cobertura con autorizaciones superpuestas, límites de semanas, archivado y exportación Excel. Ejecutar `mvn test` desde la carpeta que contiene `pom.xml`.
+`AssignmentAlgorithmIntegrationTests` verifica autorización por área, una asignación por persona y semana, rotación de descanso, cobertura de una tarea específica, cobertura con autorizaciones superpuestas, límites de semanas, archivado y exportación Excel. `AssignmentAlgorithmUnitTests` comprueba las decisiones del motor de forma aislada, incluido el cambio de tarea cuando existe una alternativa. Ejecutar `mvn test` desde la carpeta que contiene `pom.xml`.
