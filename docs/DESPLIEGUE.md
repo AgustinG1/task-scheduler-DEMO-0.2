@@ -84,7 +84,9 @@ La aplicación en Ohio se conecta a una base en `sfo`; esto agrega distancia de 
 
 ## Perfiles locales y Docker Compose
 
-`docker-compose.yml` no representa la infraestructura real de producción. Levanta dos contenedores locales: la aplicación con perfil `docker` y MySQL 8.4 en la red de Compose, con un volumen `mysql_data`. Sus credenciales fijas son solo para desarrollo. Producción utiliza Render y Aiven, el perfil predeterminado `prod` y secretos almacenados en Render.
+`docker-compose.yml` no representa la infraestructura real de producción. Levanta dos contenedores locales: `app` con perfil `docker` y `mysql` con MySQL 8.4, conectados por la red privada de Compose y con persistencia en `mysql_data`. La aplicación espera el healthcheck de la base antes de arrancar y solo publica el puerto HTTP. Los valores de demostración pueden sustituirse desde un archivo `.env` no versionado, tomando `.env.example` como plantilla.
+
+Producción utiliza Render y Aiven, el perfil predeterminado `prod` y secretos almacenados en Render; Render no procesa `docker-compose.yml`.
 
 El perfil `local` utiliza H2 en memoria y es el usado por JUnit. Ninguna prueba local escribe en Aiven.
 

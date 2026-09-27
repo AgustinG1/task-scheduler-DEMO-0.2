@@ -6,6 +6,8 @@
 
 **Producción verificada el 27 de septiembre de 2026:** un Web Service Docker gratuito de Render en Ohio construye la rama `main` de GitHub y se conecta mediante JDBC/TLS a MySQL 8.4.8 administrado por Aiven en `sfo`. El despliegue público continúa en el commit `a6c2033`; las correcciones locales anteriores aún no están desplegadas. La topología, variables por nombre, límites y enlaces operativos están en [docs/DESPLIEGUE.md](docs/DESPLIEGUE.md). No guardar secretos de Render o Aiven en esta memoria.
 
+**Registro permanente de cambios:** cada evolución funcional, de pruebas o infraestructura debe añadirse a [docs/EVOLUCION.md](docs/EVOLUCION.md), indicando su validación y estado de commit/despliegue. El 27 de septiembre de 2026 se hizo configurable el entorno Docker Compose local; `pom.xml` ya contenía una sola dependencia `mysql-connector-j`, por lo que se conservó esa declaración necesaria.
+
 Revisión: 26 de septiembre de 2026. Idioma de trabajo: español.
 
 ## Alcance y referencia verificada

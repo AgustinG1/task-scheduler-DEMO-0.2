@@ -1,36 +1,40 @@
+name: task-scheduler
+
 services:
-  db:
+  mysql:
     image: mysql:8.4
     restart: unless-stopped
     environment:
-      MYSQL_DATABASE: taskdb
-      MYSQL_USER: taskuser
-      MYSQL_PASSWORD: taskpass
-      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-taskdb}
+      MYSQL_USER: ${MYSQL_USER:-taskuser}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-taskpass}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpass}
     volumes:
       - mysql_data:/var/lib/mysql
     healthcheck:
-      test: ["CMD-SHELL", "mysqladmin ping -h localhost -uroot -prootpass --silent"]
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p\"$${MYSQL_ROOT_PASSWORD}\" --silent"]
       interval: 10s
       timeout: 5s
       retries: 10
-      start_period: 20s
+      start_period: 30s
 
   app:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
     restart: unless-stopped
     depends_on:
-      db:
+      mysql:
         condition: service_healthy
     ports:
-      - "8080:8080"
+      - "${APP_PORT:-8080}:8080"
     environment:
       SPRING_PROFILES_ACTIVE: docker
-      DB_HOST: db
+      DB_HOST: mysql
       DB_PORT: 3306
-      DB_NAME: taskdb
-      DB_USERNAME: taskuser
-      DB_PASSWORD: taskpass
+      DB_NAME: ${MYSQL_DATABASE:-taskdb}
+      DB_USERNAME: ${MYSQL_USER:-taskuser}
+      DB_PASSWORD: ${MYSQL_PASSWORD:-taskpass}
 
 volumes:
   mysql_data:

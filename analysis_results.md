@@ -258,9 +258,9 @@ templates/
 
 ### 🔴 Críticos
 
-1. **Dependencia duplicada de MySQL Connector** — en [pom.xml](file:///c:/task-scheduler/pom.xml#L69-L78) el artifact `mysql-connector-j` aparece **dos veces** (líneas 69-73 y 74-78).
+1. **Resuelto el 27 de septiembre de 2026 — MySQL Connector**: `pom.xml` contiene una sola declaración de `com.mysql:mysql-connector-j`, con alcance `runtime`. El árbol efectivo de Maven también muestra una sola dependencia.
 
-2. **`docker-compose.yml` vacío** — El archivo [docker-compose.yml](file:///c:/task-scheduler/docker-compose.yml) existe pero está **completamente vacío**. No hay definición de servicios MySQL ni de la app.
+2. **Resuelto el 27 de septiembre de 2026 — Docker Compose**: `docker-compose.yml` define la aplicación y MySQL 8.4, espera por healthcheck y conserva los datos en un volumen.
 
 3. **Credenciales de BD en producción** — En [application.properties](file:///c:/task-scheduler/src/main/resources/application.properties#L4-L6) la URL de Aiven y usuario `avnadmin` están hardcoded. La contraseña usa `${DB_PASSWORD}` (variable de entorno), lo cual es bueno, pero el host/usuario debería también parametrizarse.
 
@@ -349,6 +349,6 @@ sequenceDiagram
 5. **Reemplazar `System.out.println`** por SLF4J Logger
 6. **Usar `@Getter`/`@Setter`** en lugar de `@Data` en entidades JPA
 7. **Escribir tests unitarios** para el `AssignmentAlgorithm` (es la lógica más crítica)
-8. **Completar `docker-compose.yml`** con servicio MySQL y la app
-9. **Eliminar la dependencia duplicada** de `mysql-connector-j`
+8. **Completado:** `docker-compose.yml` con servicio MySQL y la app
+9. **Completado:** verificar que exista una única dependencia `mysql-connector-j`
 10. **Estandarizar idioma** del código (preferiblemente todo en inglés o todo en español)

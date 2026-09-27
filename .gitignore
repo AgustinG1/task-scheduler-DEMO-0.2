@@ -4,7 +4,6 @@ target/
 .mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
-.env.example
 ### STS ###
 .apt_generated
 .classpath
@@ -35,3 +34,4 @@ build/
 
 ### Environment variables ###
 .env
+!.env.example

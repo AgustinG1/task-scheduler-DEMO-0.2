@@ -31,6 +31,22 @@ Este proyecto incluye un entorno listo para demo con MySQL y la app.
 docker compose up --build
 ```
 
+Compose crea una red privada entre `app` y `mysql`, espera a que MySQL esté saludable y conserva sus datos en el volumen `mysql_data`. La base no publica su puerto en el equipo anfitrión.
+
+Los valores predeterminados sirven para desarrollo. Para personalizarlos, copia `.env.example` como `.env` y cambia `APP_PORT`, `MYSQL_DATABASE`, `MYSQL_USER`, `MYSQL_PASSWORD` o `MYSQL_ROOT_PASSWORD`. El archivo `.env` está excluido de Git.
+
+Para detener los contenedores sin borrar la base:
+
+```powershell
+docker compose down
+```
+
+Para eliminar también el volumen local de MySQL y empezar desde cero:
+
+```powershell
+docker compose down --volumes
+```
+
 Abrir:
 
 - http://localhost:8080
@@ -56,6 +72,8 @@ $env:SPRING_PROFILES_ACTIVE = "prod"
 
 - El archivo `docker-compose.yml` está pensado para que otra persona pueda probar la app sin configurar una base de datos externa.
 - Si quieres datos iniciales para demo, puedes cargarlos desde la aplicación o agregar un script de inicialización.
+- Render no utiliza este archivo: producción mantiene un Web Service Docker conectado a Aiven, como se explica en `docs/DESPLIEGUE.md`.
+- La evolución de cada cambio se conserva en `docs/EVOLUCION.md`.
 
 ## Pruebas
 
