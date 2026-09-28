@@ -94,8 +94,8 @@ public String actualizar(@PathVariable Long id,
         return "redirect:/employees";
     }
 
-    // 6. Borrado físico
-    @GetMapping("/eliminar/{id}")
+    // 6. Retirar de la lista operativa conservando las asignaciones históricas
+    @PostMapping("/eliminar/{id}")
     public String eliminar(@PathVariable Long id) {
         employeeService.deleteEmployee(id);
         return "redirect:/employees";
