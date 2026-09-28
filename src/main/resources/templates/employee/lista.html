@@ -82,10 +82,12 @@
                 <a th:href="@{/employees/editar/{id}(id=${emp.id})}" class="btn-edit">
                     <i class="bi bi-pencil"></i>
                 </a>
-                <a th:href="@{/employees/eliminar/{id}(id=${emp.id})}" class="btn-danger-ghost"
-                   onclick="return confirm('¿Eliminar este empleado?')">
-                    <i class="bi bi-trash"></i>
-                </a>
+                <form th:action="@{/employees/eliminar/{id}(id=${emp.id})}" method="post"
+                      onsubmit="return confirm('¿Desactivar este empleado? Sus planillas anteriores se conservarán.')">
+                    <button type="submit" class="btn-danger-ghost" title="Desactivar empleado">
+                        <i class="bi bi-person-x"></i>
+                    </button>
+                </form>
             </div>
         </td>
     </tr>
