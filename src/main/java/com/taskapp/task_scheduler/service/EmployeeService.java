@@ -1,10 +1,13 @@
 package com.taskapp.task_scheduler.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import java.util.List;
 
+import com.taskapp.task_scheduler.model.Assignment;
 import com.taskapp.task_scheduler.model.Employee;
+import com.taskapp.task_scheduler.repository.AssignmentRepository;
 import com.taskapp.task_scheduler.repository.EmployeeRepository;
 
 @Service
@@ -12,6 +15,7 @@ import com.taskapp.task_scheduler.repository.EmployeeRepository;
 public class EmployeeService {
 
     private final EmployeeRepository employeeRepository;
+    private final AssignmentRepository assignmentRepository;
 
     // 1. Traer todos los empleados
     public List<Employee> getAllEmployees() {
@@ -56,8 +60,17 @@ public class EmployeeService {
         employeeRepository.save(empleado); // Guardamos el cambio
     }
     
+    @Transactional
     public void deleteEmployee(Long id) {
-    Employee employee = getEmployeeById(id);
-    employeeRepository.delete(employee);
-}
+        Employee employee = getEmployeeById(id);
+        List<Assignment> assignments = assignmentRepository.findByEmployeeId(id);
+
+        if (!assignments.isEmpty()) {
+            employee.setActive(false);
+            employeeRepository.save(employee);
+            return;
+        }
+
+        employeeRepository.delete(employee);
+    }
 }
