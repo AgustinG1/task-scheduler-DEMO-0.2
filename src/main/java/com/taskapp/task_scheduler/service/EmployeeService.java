@@ -15,7 +15,7 @@ public class EmployeeService {
 
     // 1. Traer todos los empleados
     public List<Employee> getAllEmployees() {
-        return employeeRepository.findAll();
+        return employeeRepository.findByActiveTrue();
     }
 
     // 2. Buscar empleado por ID
@@ -57,7 +57,6 @@ public class EmployeeService {
     }
     
     public void deleteEmployee(Long id) {
-    Employee employee = getEmployeeById(id);
-    employeeRepository.delete(employee);
-}
+        deactivateEmployee(id);
+    }
 }
