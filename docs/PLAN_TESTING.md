@@ -1,8 +1,8 @@
 # Estado de las pruebas JUnit
 
-Actualizado el 27 de septiembre de 2026.
+Actualizado el 29 de septiembre de 2026.
 
-`mvn test -B -ntp` ejecutó **21 pruebas: 21 correctas, 0 fallidas, 0 omitidas**. Las 11 pruebas de integración y contexto continúan correctas. La nueva clase `AssignmentAlgorithmUnitTests` aporta diez ejecuciones unitarias con JUnit y Mockito, sin arrancar Spring ni usar H2.
+`mvn test -B -ntp` ejecutó **24 pruebas: 24 correctas, 0 fallidas, 0 omitidas**. Hay 12 ejecuciones de integración y contexto y 12 unitarias. `AssignmentAlgorithmUnitTests` aporta diez casos del motor; `EmployeeServiceTests`, dos casos del ciclo de vida de empleados.
 
 Las dos pruebas que fallaban en la primera revisión ahora pasan: una tarea específica compatible se cubre cada semana y cero semanas se rechaza antes de archivar una planilla previa. Se añadieron dos pruebas adicionales para semanas negativas o superiores a 52 y para tareas específicas con autorizaciones superpuestas que requieren redistribuir personas. También siguen pasando las pruebas de rotación, autorización por área, asignación única semanal, archivo global, Excel, validación de listas vacías y carga del contexto.
 
@@ -25,6 +25,10 @@ Todas estas reglas pasan. La última prueba detectó inicialmente que, con una p
 La corrección clasifica primero las tareas con candidatos ideales, después las tareas autorizadas que requieren relajar el ciclo y al final las tareas sin personas autorizadas. Conserva dentro de cada nivel la prioridad por escasez y el desempate de tareas específicas. La prueba permanece como regresión y ahora pasa.
 
 El motor conserva su diseño: intercalado aleatorio por área, rotación semanal, prioridad a tareas con pocos candidatos, historial de ciclos y tres niveles de preferencia para personas. La búsqueda interna de reasignación evita huecos cuando una combinación completa es posible. No depende de una librería externa para esa búsqueda.
+
+## Pruebas del retiro de empleados
+
+`EmployeeServiceTests` comprueba que las pantallas reciben únicamente empleados activos y que retirar una persona cambia `active` a `false` sin invocar `delete` ni `deleteById`. La prueba de integración `deactivatesEmployeeWithoutBreakingHistoricalAssignments` genera una planilla, persiste una asignación, desactiva a la persona, fuerza el guardado y confirma que tanto el empleado inactivo como la asignación histórica continúan en la base.
 
 ## Límites aún abiertos
 

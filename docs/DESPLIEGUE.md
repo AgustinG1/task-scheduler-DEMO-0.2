@@ -1,6 +1,6 @@
 # Arquitectura de despliegue
 
-Revisión realizada el 27 de septiembre de 2026 a partir del repositorio local, el panel autenticado de Render, la aplicación pública y el panel autenticado de Aiven. No se copiaron contraseñas, cadenas de conexión completas ni valores secretos.
+Revisión inicial realizada el 27 de septiembre de 2026 y actualizada el 29 de septiembre de 2026 a partir del repositorio local, el panel autenticado de Render, la aplicación pública y el panel autenticado de Aiven. No se copiaron contraseñas, cadenas de conexión completas ni valores secretos.
 
 ## Diagrama general
 
@@ -33,9 +33,9 @@ No hay frontend separado, worker, tarea cron, Redis ni base administrada por Ren
 | Comando Docker adicional | ninguno; se utiliza el `ENTRYPOINT` de la imagen |
 | URL pública | `https://task-scheduler-app-demo-0-2.onrender.com/` |
 
-Los despliegues recientes aparecen disparados por Auto-Deploy. El despliegue marcado como `Live` corresponde al commit `a6c203360fcd1da6d218bb849782019c6d8fa057`. El plan gratuito suspende la instancia por inactividad; Render advierte que el primer acceso puede tardar 50 segundos o más. Esta revisión observó la pantalla de reactivación al abrir la URL pública.
+Los despliegues recientes aparecen disparados por Auto-Deploy. El 29 de septiembre de 2026, el despliegue `dep-datiqk3bc2fs73bhkvhg` del commit funcional `f13f26c2759da99747a4785b3aae54fc06e000d7` quedó `Live` a las 03:18:32 UTC. El plan gratuito suspende la instancia por inactividad; el primer acceso puede tardar mientras Render reactiva el servicio.
 
-La copia local contiene correcciones posteriores del algoritmo y pruebas que todavía no pertenecen a ese commit. Por ello, el resultado local de 11 pruebas correctas no describe todavía el código que atiende la URL pública. Para llevar esos cambios a producción habrá que incorporarlos al repositorio Git, ejecutar las pruebas, subirlos a `main` y comprobar un nuevo despliegue `Live`.
+La versión pública incluye las correcciones del algoritmo, los tests unitarios, el ajuste de Lombok, Docker Compose y el retiro seguro de empleados. Antes de publicar `f13f26c` se ejecutaron 24 pruebas correctas. Después del despliegue, `/employees` respondió HTTP 200 con el formulario de desactivación por POST y sin el enlace antiguo de borrado físico; no se observaron errores nuevos en los logs de Render.
 
 ## Construcción y ejecución del contenedor
 

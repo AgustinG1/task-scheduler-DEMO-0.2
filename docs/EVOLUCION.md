@@ -2,6 +2,18 @@
 
 Este registro conserva cada etapa funcional del programa. Cada entrada indica el comportamiento añadido o corregido, los archivos principales, la comprobación realizada y si el cambio llegó a GitHub o producción. No debe contener contraseñas, cadenas de conexión completas ni otros secretos.
 
+## 29 de septiembre de 2026 — Retiro seguro de empleados con historial
+
+Commit publicado: `f13f26c` — `Evitar error al retirar empleados con historial`. Despliegue `dep-datiqk3bc2fs73bhkvhg` verificado como `live` en Render el 29 de septiembre de 2026 a las 03:18:32 UTC.
+
+- El incidente se reprodujo en producción al abrir `/employees/eliminar/5`. El log de Render de las 03:04:39 UTC confirmó `DataIntegrityViolationException`: MySQL impedía borrar el empleado porque `asignaciones.empleado_id` conserva una clave foránea hacia `empleados.id`.
+- Se eliminó el borrado físico del flujo de empleados. La interfaz ahora envía `POST /employees/desactivar/{id}`, marca `active=false` y conserva las asignaciones históricas.
+- Las listas de Empleados y de edición de Equipos muestran solo personal activo, por lo que la persona retirada desaparece de la operación diaria sin alterar planillas anteriores.
+- La pantalla confirma la acción, explica que se preservará el historial y muestra un mensaje de éxito después de completarla.
+- Se añadieron dos pruebas unitarias de `EmployeeService` y una prueba de integración con una asignación persistida.
+- Verificación local: `mvn test -B -ntp`, 24 pruebas correctas, 0 fallidas; `git diff --check` sin errores.
+- Verificación pública: `/employees` respondió HTTP 200, contiene formularios de desactivación por POST, no contiene enlaces `/employees/eliminar/` y Render no registró errores desde el inicio del despliegue.
+
 ## 27 de septiembre de 2026 — Lombok seguro en entidades JPA
 
 Commit publicado: `0009945` — `Reemplazar Data en entidades JPA`. Enviado a `origin/main` el 28 de septiembre de 2026. El despliegue posterior en Render aún no se ha verificado.

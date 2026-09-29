@@ -2,13 +2,15 @@
 
 **Estado local posterior a la revisión original (27 de septiembre de 2026):** se corrigió `AssignmentAlgorithm` para validar 1–52 semanas antes de archivar y asignar las tareas antes de decidir los descansos, con reubicación interna de personas cuando una elección previa bloquea una tarea compatible. No se añadió ninguna librería de optimización. `PayrollController` muestra los errores de generación en la vista. `mvn test -B -ntp` ejecutó 11 pruebas: 11 correctas, 0 fallidas. La descripción vigente del motor está en [docs/ALGORITMO.md](docs/ALGORITMO.md); los hallazgos y conteos de la revisión inicial más abajo son históricos y describen el estado anterior a estas correcciones.
 
-**Suite unitaria añadida el 27 de septiembre de 2026:** `AssignmentAlgorithmUnitTests` ejecuta diez casos con Mockito, sin Spring ni base de datos. Detectó que el motor repetía la última tarea aunque el empleado tuviera otra alternativa. Se corrigió la clasificación de tareas para procesar primero aquellas con candidatos ideales y conservar después los niveles de relajación. La suite completa queda en 21 pruebas: 21 correctas, 0 fallidas. La causa, la corrección y el contrato del test están documentados en [docs/PLAN_TESTING.md](docs/PLAN_TESTING.md).
+**Suite unitaria añadida el 27 de septiembre de 2026:** `AssignmentAlgorithmUnitTests` ejecuta diez casos con Mockito, sin Spring ni base de datos. Detectó que el motor repetía la última tarea aunque el empleado tuviera otra alternativa. Se corrigió la clasificación de tareas para procesar primero aquellas con candidatos ideales y conservar después los niveles de relajación. Esa etapa dejó 21 pruebas correctas. La causa, la corrección y el contrato del test están documentados en [docs/PLAN_TESTING.md](docs/PLAN_TESTING.md).
 
-**Producción verificada el 27 de septiembre de 2026:** un Web Service Docker gratuito de Render en Ohio construye la rama `main` de GitHub y se conecta mediante JDBC/TLS a MySQL 8.4.8 administrado por Aiven en `sfo`. El 28 de septiembre de 2026 se enviaron a `origin/main` los cambios hasta `0009945`; el último despliegue comprobado sigue siendo `a6c2033`, por lo que el estado de Render después del envío permanece pendiente de verificación. La topología, variables por nombre, límites y enlaces operativos están en [docs/DESPLIEGUE.md](docs/DESPLIEGUE.md). No guardar secretos de Render o Aiven en esta memoria.
+**Producción verificada el 29 de septiembre de 2026:** un Web Service Docker gratuito de Render en Ohio construye automáticamente la rama `main` de GitHub y se conecta mediante JDBC/TLS a MySQL 8.4.8 administrado por Aiven en `sfo`. El commit funcional `f13f26c` quedó `live` a las 03:18:32 UTC. La topología, variables por nombre, límites y enlaces operativos están en [docs/DESPLIEGUE.md](docs/DESPLIEGUE.md). No guardar secretos de Render o Aiven en esta memoria.
+
+**Retiro de empleados corregido el 29 de septiembre de 2026:** el borrado físico producía un error 500 cuando `asignaciones` conservaba referencias al empleado. El flujo usa ahora desactivación lógica por POST, lista solo personal activo y conserva las planillas históricas. Render confirmó la causa mediante `DataIntegrityViolationException`; la corrección quedó publicada en `f13f26c`. La suite actual ejecuta 24 pruebas: 24 correctas, 0 fallidas.
 
 **Registro permanente de cambios:** cada evolución funcional, de pruebas o infraestructura debe añadirse a [docs/EVOLUCION.md](docs/EVOLUCION.md), indicando su validación y estado de commit/despliegue. El 27 de septiembre de 2026 se hizo configurable el entorno Docker Compose local; `pom.xml` ya contenía una sola dependencia `mysql-connector-j`, por lo que se conservó esa declaración necesaria.
 
-**Entidades JPA ajustadas el 27 de septiembre de 2026:** las ocho entidades usan `@Getter` y `@Setter` en lugar de `@Data`, de modo que Lombok ya no incorpora asociaciones bidireccionales en `equals`, `hashCode` o `toString`. La clave compuesta `TaskAreaId` conserva `@EqualsAndHashCode`, requerido para su identidad JPA. La suite completa continúa en 21 pruebas correctas y 0 fallidas.
+**Entidades JPA ajustadas el 27 de septiembre de 2026:** las ocho entidades usan `@Getter` y `@Setter` en lugar de `@Data`, de modo que Lombok ya no incorpora asociaciones bidireccionales en `equals`, `hashCode` o `toString`. La clave compuesta `TaskAreaId` conserva `@EqualsAndHashCode`, requerido para su identidad JPA. Esa etapa se verificó con 21 pruebas correctas y 0 fallidas.
 
 Revisión: 26 de septiembre de 2026. Idioma de trabajo: español.
 
@@ -146,7 +148,7 @@ Los ocho repositorios extienden `JpaRepository`. Las consultas específicas son:
 | Servicio | Comportamiento |
 |---|---|
 | `AreaService` | CRUD simple; borrar no limpia referencias dependientes |
-| `EmployeeService` | CRUD, alta siempre activa, desactivación lógica y borrado físico directo |
+| `EmployeeService` | Alta activa, consulta de personal activo, actualización y desactivación lógica que preserva el historial |
 | `TaskService` | CRUD, vinculación tarea–área; al borrar transforma asignaciones históricas de esa tarea en descanso |
 | `FeasibilityValidator` | Solo rechaza listas nulas o vacías de empleados o tareas |
 | `AssignmentAlgorithm` | Generación transaccional de planillas por equipo y semanas; ver documento específico |
@@ -165,7 +167,7 @@ Se usan formularios HTML y redirecciones. No existe la API `/api/v1/` propuesta 
 |---|---|
 | Inicio | `GET /` |
 | Áreas | `GET /areas`; `POST /areas/guardar`; `GET` y `POST /areas/editar/{id}`; `GET /areas/eliminar/{id}` |
-| Empleados | `GET /employees`; `POST /employees/guardar`; `GET` y `POST /employees/editar/{id}`; `GET /employees/desactivar/{id}`; `GET /employees/eliminar/{id}` |
+| Empleados | `GET /employees`; `POST /employees/guardar`; `GET` y `POST /employees/editar/{id}`; `POST /employees/desactivar/{id}` |
 | Tareas | `GET /tasks`; `POST /tasks/guardar`; `GET` y `POST /tasks/editar/{id}`; `GET /tasks/eliminar/{id}` |
 | Catálogos | `GET /task-groups`; `POST /task-groups/guardar`; `GET /task-groups/editar/{id}`; `POST /task-groups/actualizar`; `GET /task-groups/eliminar/{id}` |
 | Equipos | `GET /teams`; `POST /teams/guardar`; `GET /teams/editar/{id}`; `POST /teams/actualizar`; `GET /teams/eliminar/{id}`; `POST /teams/empleado/actualizar` |
@@ -237,7 +239,7 @@ La base histórica H2 contiene 13 tablas: 3 áreas, 15 empleados, 13 tareas, 2 e
 | Historial mutable | Borrar tarea convierte asignaciones pasadas en REST; renombrar entidades cambia lo mostrado en planillas antiguas |
 | Edición manual pendiente | Existe enumeración, pero no controlador, servicio ni interfaz de edición de asignaciones |
 | Autorizaciones de tareas incompletas en formularios | Es posible crear SPECIFIC sin área; la edición no administra vínculos |
-| Borrados de áreas, empleados y equipos | Eliminación directa; referencias existentes pueden bloquearla por claves foráneas; no se verificaron todos los casos |
+| Borrados de áreas y equipos | Continúan como eliminación directa y sus referencias pueden bloquearlas; empleados quedó resuelto con desactivación lógica el 29 de septiembre de 2026 |
 | Concurrencia sin exclusión explícita | No hay bloqueo ni restricción declarada que garantice una única activa ante peticiones simultáneas; riesgo no ensayado |
 | Validación y errores | Restricciones de entidad presentes, sin `@Valid`/`BindingResult` en los controladores ni errores de negocio presentados de forma controlada |
 | Acceso abierto | No hay autenticación, roles ni Spring Security; el CRUD local respondió sin sesión |
