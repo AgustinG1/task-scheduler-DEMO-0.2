@@ -4,7 +4,7 @@ Este registro conserva cada etapa funcional del programa. Cada entrada indica el
 
 ## 27 de septiembre de 2026 — Lombok seguro en entidades JPA
 
-Estado: cambio preparado y verificado localmente; se registra en el commit que contiene esta entrada. No se ha enviado a GitHub ni desplegado en Render.
+Commit publicado: `0009945` — `Reemplazar Data en entidades JPA`. Enviado a `origin/main` el 28 de septiembre de 2026. El despliegue posterior en Render aún no se ha verificado.
 
 - Se reemplazó `@Data` por `@Getter` y `@Setter` en las ocho entidades de `model/`.
 - Se conservaron `@NoArgsConstructor` y `@AllArgsConstructor`, por lo que no cambió la forma de construir las entidades.
@@ -15,7 +15,7 @@ Estado: cambio preparado y verificado localmente; se registra en el commit que c
 
 ## 27 de septiembre de 2026 — Entorno Docker Compose reproducible
 
-Estado: cambio preparado y verificado localmente; se registra en el commit que contiene esta entrada. No se ha enviado a GitHub ni desplegado en Render.
+Commit publicado: `449b99b` — `Completar entorno Docker Compose y documentar evolucion`. Enviado a `origin/main` el 28 de septiembre de 2026. El despliegue posterior en Render aún no se ha verificado.
 
 - Se confirmó que `pom.xml` contiene una sola dependencia `com.mysql:mysql-connector-j` con alcance `runtime`. La duplicación descrita en `analysis_results.md` correspondía a una versión anterior y ya no existe; se conserva el único conector necesario para MySQL.
 - `docker-compose.yml` define los servicios `mysql` y `app`, una red privada implícita, espera por healthcheck, persistencia mediante `mysql_data` y publicación configurable del puerto HTTP.
@@ -34,7 +34,7 @@ Commit local: `d9a2672` — `Añadir tests unitarios y corregir ciclo de tareas`
 - Se corrigió la prioridad que repetía una tarea aunque hubiera otra alternativa disponible.
 - Se conservó la repetición cuando es matemáticamente inevitable y la búsqueda interna de máxima cobertura.
 - Verificación: `mvn test -B -ntp`, 21 pruebas correctas, 0 fallidas.
-- Estado remoto: commit local todavía no enviado a GitHub ni desplegado en Render.
+- Estado remoto: enviado a `origin/main` el 28 de septiembre de 2026; despliegue posterior en Render aún no verificado.
 
 ## 27 de septiembre de 2026 — Cobertura compatible, validación y documentación técnica
 
@@ -46,4 +46,4 @@ Commit local: `95ec136` — `Corregir motor y documentar despliegue`.
 - Se incorporaron pruebas de integración, documentación del algoritmo, inventario y memoria técnica.
 - Se documentó la arquitectura real GitHub–Render–Aiven sin guardar secretos.
 - Verificación de esa etapa: 11 pruebas correctas, 0 fallidas.
-- Estado remoto: commit local todavía no enviado a GitHub ni desplegado en Render.
+- Estado remoto: enviado a `origin/main` el 28 de septiembre de 2026; despliegue posterior en Render aún no verificado.
