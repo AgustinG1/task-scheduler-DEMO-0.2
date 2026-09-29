@@ -35,3 +35,11 @@ build/
 ### Environment variables ###
 .env
 !.env.example
+
+# Documentación y registros locales que no se publican en GitHub
+*.md
+!/README.md
+/docs/
+/intro.docx
+/data/
+/src/main/java/com/taskapp/task_scheduler/service/algoritmoantes.txt

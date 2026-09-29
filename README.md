@@ -2,7 +2,7 @@
 
 Aplicación web en Spring Boot para administrar áreas, tareas, empleados, catálogos, equipos y planillas.
 
-La producción utiliza un Web Service Docker en Render y MySQL administrado en Aiven. Consulta [la arquitectura de despliegue](docs/DESPLIEGUE.md) para conocer el flujo, los perfiles y las comprobaciones operativas sin exponer secretos.
+La producción utiliza un Web Service Docker en Render y MySQL administrado en Aiven.
 
 ## Requisitos
 
@@ -72,8 +72,7 @@ $env:SPRING_PROFILES_ACTIVE = "prod"
 
 - El archivo `docker-compose.yml` está pensado para que otra persona pueda probar la app sin configurar una base de datos externa.
 - Si quieres datos iniciales para demo, puedes cargarlos desde la aplicación o agregar un script de inicialización.
-- Render no utiliza este archivo: producción mantiene un Web Service Docker conectado a Aiven, como se explica en `docs/DESPLIEGUE.md`.
-- La evolución de cada cambio se conserva en `docs/EVOLUCION.md`.
+- Render no utiliza este archivo: producción mantiene un Web Service Docker conectado a Aiven.
 
 ## Pruebas
 
@@ -83,4 +82,4 @@ Ejecuta la suite JUnit desde esta carpeta:
 .\mvnw.cmd test
 ```
 
-Las pruebas de integración usan H2 en memoria y deshacen sus datos al terminar. La suite comprueba la cobertura de tareas compatibles, los límites de semanas, la rotación, el archivado y la exportación Excel. Consulta [el estado y los próximos pasos](docs/PLAN_TESTING.md).
+Las pruebas de integración usan H2 en memoria y deshacen sus datos al terminar. La suite comprueba la cobertura de tareas compatibles, los límites de semanas, la rotación, el archivado y la exportación Excel.
