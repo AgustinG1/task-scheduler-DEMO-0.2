@@ -49,6 +49,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 class AssignmentAlgorithmIntegrationTests {
 
     @Autowired private AssignmentAlgorithm algorithm;
+    @Autowired private EmployeeService employeeService;
     @Autowired private ExcelExportService excelExportService;
     @Autowired private AreaRepository areaRepository;
     @Autowired private EmployeeRepository employeeRepository;
@@ -131,6 +132,25 @@ class AssignmentAlgorithmIntegrationTests {
         assertEquals(PayrollStatus.ACTIVE, payrollRepository.findById(second.getId()).orElseThrow().getStatus());
         assertEquals(1, payrollRepository.findByStatus(PayrollStatus.ACTIVE).size());
         assertEquals(1, assignmentRepository.findByPayrollId(first.getId()).size());
+    }
+
+    @Test
+    void deactivatesEmployeeWithoutBreakingHistoricalAssignments() {
+        Area area = area("Área histórica");
+        Employee employee = employee("Persona histórica", area, true);
+        Task task = task("Tarea histórica", TaskType.GENERAL);
+        Team team = team("Equipo histórico", List.of(area), List.of(task));
+        Payroll payroll = algorithm.generatePayroll(1, team.getId());
+
+        employeeService.deactivateEmployee(employee.getId());
+        entityManager.flush();
+        entityManager.clear();
+
+        Employee stored = employeeRepository.findById(employee.getId()).orElseThrow();
+        List<Assignment> historicalAssignments = assignmentRepository.findByPayrollId(payroll.getId());
+        assertFalse(stored.isActive());
+        assertEquals(1, historicalAssignments.size());
+        assertEquals(employee.getId(), historicalAssignments.get(0).getEmployee().getId());
     }
 
     @Test

@@ -62,7 +62,7 @@ public class TeamController {
         
         // Filtramos los empleados dinámicamente:
         // Solo incluimos en la lista a aquellos cuyo área coincida con las áreas operativas del equipo.
-        List<Employee> empleadosFiltrados = employeeRepository.findAll().stream()
+        List<Employee> empleadosFiltrados = employeeRepository.findByActiveTrue().stream()
                 .filter(emp -> team.getAreas() != null && team.getAreas().contains(emp.getArea()))
                 .toList();
         

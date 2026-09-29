@@ -3,10 +3,10 @@ package com.taskapp.task_scheduler.controller;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import lombok.RequiredArgsConstructor;
 
 import com.taskapp.task_scheduler.model.Employee;
-import com.taskapp.task_scheduler.model.TaskType;
 import com.taskapp.task_scheduler.model.Area;
 import com.taskapp.task_scheduler.service.EmployeeService;
 import com.taskapp.task_scheduler.service.AreaService;
@@ -87,17 +87,12 @@ public String actualizar(@PathVariable Long id,
     return "redirect:/employees";
 }
 
-    // 5. Borrado lógico
-    @GetMapping("/desactivar/{id}")
-    public String desactivar(@PathVariable Long id) {
+    // 5. Retirar del personal activo sin alterar las asignaciones históricas
+    @PostMapping("/desactivar/{id}")
+    public String desactivar(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         employeeService.deactivateEmployee(id);
-        return "redirect:/employees";
-    }
-
-    // 6. Borrado físico
-    @GetMapping("/eliminar/{id}")
-    public String eliminar(@PathVariable Long id) {
-        employeeService.deleteEmployee(id);
+        redirectAttributes.addFlashAttribute("success",
+                "Empleado retirado del personal activo. Sus asignaciones históricas se conservaron.");
         return "redirect:/employees";
     }
 }

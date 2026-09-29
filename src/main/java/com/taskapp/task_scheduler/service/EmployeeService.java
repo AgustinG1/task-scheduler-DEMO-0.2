@@ -1,6 +1,7 @@
 package com.taskapp.task_scheduler.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import java.util.List;
 
@@ -15,7 +16,7 @@ public class EmployeeService {
 
     // 1. Traer todos los empleados
     public List<Employee> getAllEmployees() {
-        return employeeRepository.findAll();
+        return employeeRepository.findByActiveTrue();
     }
 
     // 2. Buscar empleado por ID
@@ -50,14 +51,10 @@ public class EmployeeService {
 
     // 6. Desactivar empleado (Borrado Lógico)
     // NO usamos employeeRepository.delete() para no romper las planillas históricas
+    @Transactional
     public void deactivateEmployee(Long id) {
         Employee empleado = getEmployeeById(id);
-        empleado.setActive(false); // Simplemente le quitamos el estado activo
-        employeeRepository.save(empleado); // Guardamos el cambio
+        empleado.setActive(false);
+        employeeRepository.save(empleado);
     }
-    
-    public void deleteEmployee(Long id) {
-    Employee employee = getEmployeeById(id);
-    employeeRepository.delete(employee);
-}
 }

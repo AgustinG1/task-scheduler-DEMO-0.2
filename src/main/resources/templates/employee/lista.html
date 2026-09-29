@@ -11,6 +11,8 @@
             <p class="page-subtitle">Administrá al personal y asigná sus áreas correspondientes</p>
         </div>
 
+        <div th:if="${success}" class="alert alert-success" role="status" th:text="${success}"></div>
+
         <div class="row g-4">
             <div class="col-12 col-xl-4 fade-up fade-up-1">
                 <div class="card-dark">
@@ -82,10 +84,13 @@
                 <a th:href="@{/employees/editar/{id}(id=${emp.id})}" class="btn-edit">
                     <i class="bi bi-pencil"></i>
                 </a>
-                <a th:href="@{/employees/eliminar/{id}(id=${emp.id})}" class="btn-danger-ghost"
-                   onclick="return confirm('¿Eliminar este empleado?')">
-                    <i class="bi bi-trash"></i>
-                </a>
+                <form th:action="@{/employees/desactivar/{id}(id=${emp.id})}" method="post" class="m-0">
+                    <button type="submit" class="btn-danger-ghost"
+                            th:attr="aria-label=${'Retirar a ' + emp.name},title=${'Retirar a ' + emp.name}"
+                            onclick="return confirm('¿Retirar este empleado del personal activo? Sus asignaciones históricas se conservarán.')">
+                        <i class="bi bi-person-dash"></i>
+                    </button>
+                </form>
             </div>
         </td>
     </tr>
