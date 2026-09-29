@@ -46,7 +46,7 @@
                         <td style="color:var(--text-secondary)" th:text="${#temporals.format(p.generatedAt, 'dd-MM-yyyy HH:mm')}"></td>
                         
                         <td style="display: flex; gap: 8px; justify-content: center;">
-                            <a th:href="@{/api/payrolls/{id}/download(id=${p.id})}" class="btn-ghost" style="color: #10b981; padding: 6px 10px;" title="Descargar Matriz CSV">
+                            <a th:href="@{/api/payrolls/{id}/download(id=${p.id})}" class="btn-ghost" style="color: var(--success); padding: 6px 10px;" title="Descargar Matriz CSV">
                                 <i class="bi bi-filetype-csv"></i>
                             </a>
                             
