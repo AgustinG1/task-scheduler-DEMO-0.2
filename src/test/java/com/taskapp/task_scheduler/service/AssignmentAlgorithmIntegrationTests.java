@@ -39,6 +39,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE, properties = {
         "spring.jpa.show-sql=false",
@@ -60,6 +61,45 @@ class AssignmentAlgorithmIntegrationTests {
     @Autowired private PayrollRepository payrollRepository;
     @Autowired private AssignmentRepository assignmentRepository;
     @Autowired private EntityManager entityManager;
+
+    @Test
+    void persistsAFairEightWeekPastryPayroll() {
+        Area pasteles = area("Pasteles");
+        Area tortas = area("Tortas");
+        List<Employee> employees = List.of(employee("Barbara", pasteles, true), employee("Melanye", pasteles, true),
+                employee("Agustin", pasteles, true), employee("Johan", tortas, true), employee("Clei", tortas, true),
+                employee("Johnaiker", tortas, true), employee("Rafa", tortas, true), employee("Erliud", tortas, true));
+        List<Task> tasks = List.of(task("Basura", TaskType.GENERAL), task("Lavadero", TaskType.GENERAL),
+                task("Refrigerador", TaskType.GENERAL), task("Chocolatera", TaskType.GENERAL),
+                specificTask("Camara Pasteles", pasteles), specificTask("Maquinas Pasteles", pasteles),
+                specificTask("Camara Tortas", tortas), specificTask("Maquinas Tortas", tortas));
+        Team team = team("Pasteleria", List.of(pasteles, tortas), tasks);
+        Payroll payroll = algorithm.generatePayroll(8, team.getId());
+        entityManager.flush();
+        List<Assignment> assignments = assignmentRepository.findByPayrollId(payroll.getId());
+        assertEquals(64, assignments.size());
+        assertTrue(assignments.stream().allMatch(a -> a.getStatus() == AssignmentStatus.ASSIGNED && a.getTask() != null));
+        for (int w = 1; w <= 8; w++) {
+            int week = w;
+            var weekly = assignments.stream().filter(a -> a.getWeekNumber() == week).toList();
+            assertEquals(8, weekly.stream().map(a -> a.getEmployee().getId()).distinct().count());
+            assertEquals(8, weekly.stream().map(a -> a.getTask().getId()).distinct().count());
+        }
+        for (Employee employee : employees) {
+            var personal = assignments.stream().filter(a -> a.getEmployee().getId().equals(employee.getId()))
+                    .sorted(java.util.Comparator.comparingInt(Assignment::getWeekNumber)).toList();
+            for (int w = 1; w < 8; w++) assertFalse(personal.get(w - 1).getTask().getId().equals(personal.get(w).getTask().getId()));
+            for (Employee peer : employees) {
+                if (!peer.getArea().getId().equals(employee.getArea().getId())) continue;
+                for (Task task : tasks) {
+                    long first = personal.stream().filter(a -> a.getTask().getId().equals(task.getId())).count();
+                    long second = assignments.stream().filter(a -> a.getEmployee().getId().equals(peer.getId())
+                            && a.getTask().getId().equals(task.getId())).count();
+                    assertTrue(Math.abs(first - second) <= 1, employee.getName() + "/" + peer.getName() + ": " + task.getName());
+                }
+            }
+        }
+    }
 
     @Test
     void assignsEachEligibleEmployeeOncePerWeekAndRespectsSpecificAreas() {
