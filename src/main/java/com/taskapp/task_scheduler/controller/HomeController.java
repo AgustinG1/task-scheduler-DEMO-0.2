@@ -24,28 +24,40 @@ public class HomeController {
 
     @GetMapping("/")
     public String index(Model model) {
+        long areasCount = areaRepository.count();
+        long tasksCount = taskRepository.count();
+        long employeesCount = employeeRepository.countByActiveTrue();
+        long groupsCount = taskGroupRepository.count();
+        long teamsCount = teamRepository.count();
+        long payrollsCount = payrollRepository.count();
         long modulosConDatos = 0;
 
-        if (areaRepository.count() > 0) {
+        if (areasCount > 0) {
             modulosConDatos++;
         }
-        if (taskRepository.count() > 0) {
+        if (tasksCount > 0) {
             modulosConDatos++;
         }
-        if (employeeRepository.count() > 0) {
+        if (employeesCount > 0) {
             modulosConDatos++;
         }
-        if (taskGroupRepository.count() > 0) {
+        if (groupsCount > 0) {
             modulosConDatos++;
         }
-        if (teamRepository.count() > 0) {
+        if (teamsCount > 0) {
             modulosConDatos++;
         }
-        if (payrollRepository.count() > 0) {
+        if (payrollsCount > 0) {
             modulosConDatos++;
         }
 
         model.addAttribute("modulosConDatos", modulosConDatos);
+        model.addAttribute("areasCount", areasCount);
+        model.addAttribute("tasksCount", tasksCount);
+        model.addAttribute("employeesCount", employeesCount);
+        model.addAttribute("groupsCount", groupsCount);
+        model.addAttribute("teamsCount", teamsCount);
+        model.addAttribute("payrollsCount", payrollsCount);
         return "index";
     }
 }

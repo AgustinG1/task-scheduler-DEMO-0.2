@@ -672,6 +672,24 @@
 
 
 
+        @media (max-width: 992px) {
+            .nav-links {
+                visibility: hidden;
+                max-height: calc(100dvh - var(--nav-height));
+                overflow-y: auto;
+                transition: opacity 0.3s ease, transform 0.3s ease, visibility 0s linear 0.3s;
+            }
+
+            .nav-links.active {
+                visibility: visible;
+                transition: opacity 0.3s ease, transform 0.3s ease, visibility 0s;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .fade-up { animation: none; }
+            .nav-links { transition: none; }
+        }
     </style>
 </head>
 <body>
@@ -683,11 +701,11 @@
         </span>
     </a>
 
-    <button class="mobile-toggle" id="menu-toggle-btn" aria-label="Abrir menú">
+    <button class="mobile-toggle" id="menu-toggle-btn" type="button" aria-label="Abrir menú" aria-expanded="false" aria-controls="nav-links">
         <i class="bi bi-list"></i>
     </button>
 
-    <div class="nav-links">
+    <div class="nav-links" id="nav-links">
         <a th:href="@{/areas}" class="nav-link">
             <i class="bi bi-grid-3x3-gap"></i> Áreas
         </a>
@@ -725,21 +743,34 @@
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const menuBtn = document.getElementById('menu-toggle-btn');
-        const navMenu = document.querySelector('.nav-links');
+        const navMenu = document.getElementById('nav-links');
         const icon = menuBtn.querySelector('i');
 
+        function setMenu(open) {
+            navMenu.classList.toggle('active', open);
+            menuBtn.setAttribute('aria-expanded', open);
+            menuBtn.setAttribute('aria-label', open ? 'Cerrar menú' : 'Abrir menú');
+            icon.classList.toggle('bi-list', !open);
+            icon.classList.toggle('bi-x-lg', open);
+        }
+
         menuBtn.addEventListener('click', function() {
-            // Activa o desactiva la clase que muestra el menú
-            navMenu.classList.toggle('active');
-            
-            // Cambia el ícono de las tres rayas a una X
-            if (navMenu.classList.contains('active')) {
-                icon.classList.remove('bi-list');
-                icon.classList.add('bi-x-lg');
-            } else {
-                icon.classList.remove('bi-x-lg');
-                icon.classList.add('bi-list');
+            setMenu(!navMenu.classList.contains('active'));
+        });
+        navMenu.addEventListener('click', function(e) {
+            if (e.target.closest('a')) setMenu(false);
+        });
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.app-navbar')) setMenu(false);
+        });
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && navMenu.classList.contains('active')) {
+                setMenu(false);
+                menuBtn.focus();
             }
+        });
+        window.matchMedia('(min-width: 993px)').addEventListener('change', function() {
+            setMenu(false);
         });
     });
 </script>

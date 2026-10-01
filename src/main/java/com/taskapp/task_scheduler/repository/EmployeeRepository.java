@@ -21,5 +21,6 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
     // Traer a todos los empleados activos sin importar el área
     List<Employee> findByActiveTrue();
 
-}
+    long countByActiveTrue();
 
+}
