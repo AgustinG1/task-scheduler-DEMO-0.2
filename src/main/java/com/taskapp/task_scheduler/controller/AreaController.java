@@ -14,12 +14,17 @@ import com.taskapp.task_scheduler.service.AreaService;
 public class AreaController {
 
     private final AreaService areaService;
+    private final com.taskapp.task_scheduler.service.EmployeeService employeeService;
 
     // 1. Mostrar la página con la tabla de áreas y el formulario de creación
     @GetMapping
     public String listar(Model model) {
         model.addAttribute("areas", areaService.getAllAreas());
-        model.addAttribute("nuevaArea", new Area()); 
+        model.addAttribute("nuevaArea", new Area());
+        model.addAttribute("personalPorArea", employeeService.getAllEmployees().stream()
+                .filter(employee -> employee.getArea() != null)
+                .collect(java.util.stream.Collectors.groupingBy(
+                        employee -> employee.getArea().getId(), java.util.stream.Collectors.counting())));
         return "area/lista";  
     }
 

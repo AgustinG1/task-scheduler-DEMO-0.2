@@ -1,36 +1,20 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{layout/base :: layout(~{::#page-content}, 'Empleados')}">
-<body>
-
-<div id="page-content" th:fragment="content">
-    
-    <div class="container-fluid p-0">
-        <div class="page-header fade-up mb-4">
-            <h1 class="page-title">Gestión de Empleados</h1>
-            <p class="page-subtitle">Administrá al personal y asigná sus áreas correspondientes</p>
-        </div>
-
-        <div th:if="${success}" class="alert alert-success" role="status" th:text="${success}"></div>
-
-        <div class="row g-4">
-            <div class="col-12 col-xl-4 fade-up fade-up-1">
-                <div class="card-dark">
-                    <div class="card-header-dark">
-                        <span class="card-title-dark">
-                            <i class="bi bi-person-plus me-2" style="color:var(--accent)"></i>Nuevo Empleado
-                        </span>
-                    </div>
-                    <div class="card-body-dark">
-                        <!-- CAMBIO: no usar th:field, usar name y value -->
-                        <form th:action="@{/employees/guardar}" method="post" class="form-dark">
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout/base :: layout(~{::#page-content}, 'Empleados')}"><body>
+<section id="page-content" class="management" data-management>
+<link rel="stylesheet" th:href="@{/css/management.css}"/>
+<div class="page-header"><div><h1 class="page-title">Empleados</h1><p class="page-subtitle">El personal activo y el área a la que pertenece.</p></div><button type="button" class="btn-primary-dark" data-open-create hidden><i class="bi bi-plus-lg" aria-hidden="true"></i>Nuevo empleado</button></div>
+<div th:if="${success}" class="alert alert-success" role="status" th:text="${success}"></div>
+<div class="card-dark"><div class="management-tools" hidden><input type="search" data-search placeholder="Buscar por nombre" aria-label="Buscar por nombre"/><div class="management-filters"><button type="button" data-filter="" aria-pressed="true">Todos <b></b></button><button type="button" th:each="area : ${areas}" th:attr="data-filter=${area.id}" aria-pressed="false"><span th:text="${area.nombre}"></span> <b></b></button><button type="button" data-filter="none" aria-pressed="false">Sin área <b></b></button></div><span data-count role="status" aria-live="polite"></span></div>
+<table class="table-dark-custom"><thead><tr><th>Nombre</th><th>Área</th><th>Acciones</th></tr></thead><tbody><tr th:each="emp : ${employees}" data-row th:attr="data-name=${emp.name},data-category=${emp.area != null ? emp.area.id : 'none'}"><td><span class="person"><span class="initial" aria-hidden="true" th:text="${#strings.isEmpty(emp.name) ? '?' : #strings.toUpperCase(#strings.substring(emp.name,0,1))}"></span><strong th:text="${emp.name}"></strong></span></td><td data-label="Área"><span class="badge-general" th:text="${emp.area != null ? emp.area.nombre : 'Sin área'}"></span></td><td><div class="row-actions"><a class="btn-edit" th:href="@{/employees/editar/{id}(id=${emp.id})}" th:attr="aria-label=${'Editar a ' + emp.name},title=${'Editar a ' + emp.name}"><i class="bi bi-pencil" aria-hidden="true"></i></a><form th:action="@{/employees/desactivar/{id}(id=${emp.id})}" method="post" class="m-0"><button class="btn-danger-ghost" th:attr="aria-label=${'Retirar a ' + emp.name},title=${'Retirar a ' + emp.name}" onclick="return confirm('¿Retirar este empleado del personal activo? Sus asignaciones históricas se conservarán.')"><i class="bi bi-person-dash" aria-hidden="true"></i></button></form></div></td></tr></tbody></table>
+<p class="empty-state" data-empty th:hidden="${!#lists.isEmpty(employees)}">Todavía no hay registros. Usá «Nuevo empleado» para comenzar.</p></div>
+<div data-create-panel class="create-panel"><h2 id="create-title">Nuevo empleado</h2><form th:action="@{/employees/guardar}" method="post" class="form-dark">
                             <div class="mb-3">
-                                <label class="form-label">Nombre del empleado</label>
-                                <input type="text" name="nombre" class="form-control" placeholder="Ej: Pepe Z" required/>
+                                <label for="create-field-1" class="form-label">Nombre del empleado</label>
+                                <input id="create-field-1" type="text" name="nombre" class="form-control" placeholder="Ej: Pepe Z" required/>
                             </div>
                             <div class="mb-4">
-                                <label class="form-label">Área asignada</label>
-                                <select name="area.id" class="form-select" required>
+                                <label for="create-field-2" class="form-label">Área asignada</label>
+                                <select id="create-field-2" name="area.id" class="form-select" required>
                                     <option value="" disabled selected>-- Seleccionar área --</option>
                                     <option th:each="area : ${areas}" 
                                             th:value="${area.id}" 
@@ -41,66 +25,6 @@
                             <button type="submit" class="btn-primary-dark w-100 justify-content-center">
                                 <i class="bi bi-check2-circle"></i> Guardar empleado
                             </button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-12 col-xl-8 fade-up fade-up-2">
-                <div class="card-dark">
-                    <div class="card-header-dark">
-                        <span class="card-title-dark">
-                            <i class="bi bi-people me-2" style="color:var(--accent)"></i>Personal Registrado
-                        </span>
-                        <span style="font-size:12px; color:var(--text-muted); font-family:var(--font-mono)" th:text="${#lists.size(employees)} + ' empleados'"></span>
-                    </div>
-                    
-                    <div th:if="${#lists.isEmpty(employees)}" class="empty-state">
-                        <i class="bi bi-person-x"></i>
-                        <p>Todavía no hay empleados registrados en el sistema</p>
-                    </div>
-
-                    <table th:unless="${#lists.isEmpty(employees)}" class="table-dark-custom">
-                        <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>Nombre</th>
-                                <th>Área</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-<tbody>
-    <tr th:each="emp : ${employees}">
-        <td style="color:var(--text-muted); font-family:var(--font-mono)" th:text="${emp.id}"></td>
-        
-        <td><span style="font-weight:600" th:text="${emp.name}"></span></td>
-        
-        <td>
-            <span class="badge-general" th:text="${emp.area != null ? emp.area.nombre : 'Sin área'}"></span>
-        </td>
-        
-        <td>
-            <div class="d-flex gap-2">
-                <a th:href="@{/employees/editar/{id}(id=${emp.id})}" class="btn-edit">
-                    <i class="bi bi-pencil"></i>
-                </a>
-                <form th:action="@{/employees/desactivar/{id}(id=${emp.id})}" method="post" class="m-0">
-                    <button type="submit" class="btn-danger-ghost"
-                            th:attr="aria-label=${'Retirar a ' + emp.name},title=${'Retirar a ' + emp.name}"
-                            onclick="return confirm('¿Retirar este empleado del personal activo? Sus asignaciones históricas se conservarán.')">
-                        <i class="bi bi-person-dash"></i>
-                    </button>
-                </form>
-            </div>
-        </td>
-    </tr>
-</tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-</body>
-</html>
+                        </form><button type="button" class="btn-ghost" data-close-create hidden>Cancelar</button></div>
+<script th:src="@{/js/management.js}"></script>
+</section></body></html>
