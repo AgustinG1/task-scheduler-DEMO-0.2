@@ -42,8 +42,13 @@ $restoreReady = $false
 $restoreDeadline = [DateTime]::UtcNow.AddSeconds(120)
 while ([DateTime]::UtcNow -lt $restoreDeadline) {
     # Wait for the final mysqld PID 1, not the entrypoint's temporary init server.
-    & $restoreDocker.Source exec $restoreContainer sh -c 'test "$(cat /proc/1/comm)" = mysqld && mysqladmin --user=root ping --silent >/dev/null' 2>$null
-    if ($LASTEXITCODE -eq 0) { $restoreReady = $true; break }
+    # Separate native arguments avoid Windows PowerShell 5.1 stripping the
+    # embedded shell quotes around $(cat ...). No shell expansion is needed.
+    $restorePidOne = & $restoreDocker.Source exec $restoreContainer cat /proc/1/comm
+    if ($LASTEXITCODE -eq 0 -and ([string]$restorePidOne).Trim() -eq 'mysqld') {
+        & $restoreDocker.Source exec $restoreContainer mysqladmin --user=root ping --silent | Out-Null
+        if ($LASTEXITCODE -eq 0) { $restoreReady = $true; break }
+    }
     Start-Sleep -Milliseconds 500
 }
 if (-not $restoreReady) { throw ('MySQL no termino de arrancar. Contenedor conservado: ' + $restoreContainer) }
