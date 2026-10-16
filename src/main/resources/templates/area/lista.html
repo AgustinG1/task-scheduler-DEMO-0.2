@@ -9,12 +9,12 @@
 <p class="empty-state" data-empty th:hidden="${!#lists.isEmpty(areas)}">Todavía no hay registros. Usá «Nueva área» para comenzar.</p></div>
 <div data-create-panel class="create-panel"><h2 id="create-title">Nueva área</h2><form th:action="@{/areas/guardar}" th:object="${nuevaArea}" method="post" class="form-dark">
                         <div class="mb-3">
-                            <label for="create-field-1" class="form-label">Nombre</label>
-                            <input id="create-field-1" type="text" class="form-control" th:field="*{nombre}" placeholder="Ej: Tortas" required/>
+                            <label for="nombre" class="form-label">Nombre</label>
+                            <input id="nombre" type="text" class="form-control" th:field="*{nombre}" placeholder="Ej: Tortas" required/>
                         </div>
                         <div class="mb-4">
-                            <label for="create-field-2" class="form-label">Descripción <span style="color:var(--text-muted)">(opcional)</span></label>
-                            <input id="create-field-2" type="text" class="form-control" th:field="*{descripcion}" placeholder="Breve descripción"/>
+                            <label for="descripcion" class="form-label">Descripción <span style="color:var(--text-muted)">(opcional)</span></label>
+                            <input id="descripcion" type="text" class="form-control" th:field="*{descripcion}" placeholder="Breve descripción"/>
                         </div>
                         <button type="submit" class="btn-primary-dark w-100">
                             <i class="bi bi-plus-lg"></i> Guardar área

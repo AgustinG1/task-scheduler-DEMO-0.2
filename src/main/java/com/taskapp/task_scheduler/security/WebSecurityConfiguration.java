@@ -32,6 +32,7 @@ public class WebSecurityConfiguration {
         http.authorizeHttpRequests(rules -> rules
                 .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
                 .requestMatchers(HttpMethod.GET, "/", "/assets/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/css/management.css", "/js/management.js").permitAll()
                 .requestMatchers("/account", "/api/me").authenticated()
                 .requestMatchers("/app", "/areas/**", "/tasks/**", "/employees/**", "/task-groups/**",
                         "/teams/**", "/payroll/**", "/api/payrolls/**")

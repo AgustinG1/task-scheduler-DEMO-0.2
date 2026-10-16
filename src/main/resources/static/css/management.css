@@ -3,3 +3,33 @@
 @media(max-width:768px){.management .page-header{align-items:stretch}.management-tools{padding:16px}.management-tools input{width:100%}[data-count]{margin-left:0;width:100%}.management .table-dark-custom td{text-align:left;gap:12px;padding:12px 16px}.management .table-dark-custom td:first-child:before,.management .table-dark-custom td:last-child:before{display:none}.management .table-dark-custom td:first-child{justify-content:flex-start}.management .table-dark-custom td:last-child{justify-content:flex-end}.management .table-dark-custom tr{margin-bottom:12px}.management .table-dark-custom tr:last-child{margin-bottom:0}}
 
 @media(max-width:768px){.management:has(.person) .table-dark-custom tr{display:grid;grid-template-columns:minmax(0,1fr) auto;padding:14px;gap:8px}.management:has(.person) .table-dark-custom td{padding:4px;border:0;width:auto;background:transparent}.management:has(.person) .table-dark-custom td:nth-child(2){grid-column:1;justify-content:flex-start}.management:has(.person) .table-dark-custom td:nth-child(2):before{display:none}.management:has(.person) .table-dark-custom td:last-child{grid-column:2;grid-row:1 / span 2;align-self:start}}
+
+/* Keep names, actions and dialog controls usable at narrow widths. */
+.management .page-header > div,
+.management .person { min-width: 0; }
+.management .person strong { overflow-wrap: anywhere; }
+.management .row-actions { flex-shrink: 0; align-items: center; }
+.management .row-actions form { display: flex; }
+.management .btn-primary-dark,
+.management-dialog .btn-primary-dark,
+.management-dialog .btn-ghost { min-height: 44px; }
+.management-filters button:hover { background: var(--bg-elevated); }
+.management-filters button[aria-pressed="true"] { background: var(--accent-glow); }
+.management-tools input { font-size: 16px; }
+.management-dialog { color-scheme: dark; margin: auto; }
+.management-dialog .form-control,
+.management-dialog .form-select { min-height: 44px; font-size: 16px; }
+.management-dialog [data-close-create] { width: 100%; justify-content: center; }
+.management-dialog:focus-visible { outline-offset: -4px; }
+body:has(.management-dialog[open]) { overflow: hidden; }
+
+@media (max-width: 768px) {
+    .management { margin: 8px auto; }
+    .management .page-title { font-size: 26px; }
+    .management .card-dark { background: transparent; border: 0; overflow: visible; }
+    .management-tools { padding: 0 0 20px; }
+    .management-filters { width: 100%; }
+    .management-dialog { padding: 20px; width: calc(100vw - 32px); max-height: calc(100dvh - 32px); }
+    .management:has(.person) .table-dark-custom td:last-child { padding-left: 8px; }
+    .management .empty-state { border: 1px solid var(--border); border-radius: 12px; }
+}

@@ -49,6 +49,28 @@ class OwnerIsolationTests {
     Fixture a;
     Fixture b;
 
+    @Test
+    void managementPagesServeTheirStylesAndScriptsThroughTheSecurityChain() throws Exception {
+        for (String path : List.of("/employees", "/tasks", "/areas")) {
+            String html = http.perform(get(path).with(identity("A"))).andExpect(status().isOk())
+                    .andReturn().getResponse().getContentAsString();
+            var resources = java.util.regex.Pattern.compile("(?:href|src)=\"(/(?:css|js)/[^\"]+)\"")
+                    .matcher(html);
+            int checked = 0;
+            while (resources.find()) {
+                String resource = resources.group(1);
+                String mediaType = resource.contains("/css/") ? "text/css" : "text/javascript";
+                for (var request : List.of(get(resource), get(resource).with(identity("A")))) {
+                    http.perform(request).andExpect(status().isOk())
+                            .andExpect(content().contentTypeCompatibleWith(mediaType))
+                            .andExpect(content().string(not(isEmptyString())));
+                }
+                checked++;
+            }
+            assertThat(checked).as("CSS and script for %s", path).isEqualTo(2);
+        }
+    }
+
     @BeforeEach
     void fixtures() throws Exception {
         for (String table : List.of("asignaciones", "planillas", "empleado_equipo", "tarea_equipo",

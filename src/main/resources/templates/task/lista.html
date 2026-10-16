@@ -10,20 +10,20 @@
 <div data-create-panel class="create-panel"><h2 id="create-title">Nueva tarea</h2><form th:action="@{/tasks/guardar}" th:object="${nuevaTarea}" method="post" class="form-dark">
                             
                             <div class="mb-3">
-                                <label for="create-field-1" class="form-label">Nombre de la tarea</label>
-                                <input id="create-field-1" type="text" th:field="*{name}" class="form-control" placeholder="Ej: Limpiar vitrinas" required/>
+                                <label for="name" class="form-label">Nombre de la tarea</label>
+                                <input id="name" type="text" th:field="*{name}" class="form-control" placeholder="Ej: Limpiar vitrinas" required/>
                             </div>
 
                             <div class="mb-4">
-                                <label for="create-field-2" class="form-label">Tipo de Tarea</label>
-                                <select id="create-field-2" th:field="*{type}" data-task-type class="form-select" required>
+                                <label for="type" class="form-label">Tipo de tarea</label>
+                                <select id="type" th:field="*{type}" data-task-type class="form-select" required>
                                     <option value="" disabled selected>-- Seleccionar tipo --</option>
                                     <option value="GENERAL">General (Todos pueden hacerla)</option>
                                     <option value="SPECIFIC">Específica (Requiere área autorizada)</option>
                                 </select>
                             </div>
 
-                            <div class="mb-4" id="areaSelectDiv" style="display: none;">
+                            <div class="mb-4" id="areaSelectDiv">
                                 <label for="create-field-3" class="form-label">Área Autorizada</label>
                                 <select id="create-field-3" name="areaId" data-task-area class="form-select">
                                     <option value="" disabled selected>-- Seleccionar área --</option>
