@@ -551,7 +551,7 @@
             background: var(--bg-elevated);
         }
 
-        @media (max-width: 992px) {
+        @media (max-width: 1199px) {
             /* 1. Activar el botón hamburguesa */
             .mobile-toggle {
                 display: block;
@@ -672,7 +672,7 @@
 
 
 
-        @media (max-width: 992px) {
+        @media (max-width: 1199px) {
             .nav-links {
                 visibility: hidden;
                 max-height: calc(100dvh - var(--nav-height));
@@ -695,7 +695,7 @@
 <body>
 
 <nav class="app-navbar">
-    <a th:href="@{/}" href="/" class="app-brand" aria-label="Ir al inicio">
+    <a th:href="@{/app}" href="/app" class="app-brand" aria-label="Ir a mi panel">
         <span class="brand-logo-frame">
             <img class="brand-logo" th:src="@{/assets/Logo.svg}" src="/assets/Logo.svg" alt="TaskScheduler"/>
         </span>
@@ -732,6 +732,10 @@
         <a th:href="@{/payroll/historial}" class="nav-link">
             <i class="bi bi-clock-history"></i> Historial
         </a>
+        <a th:href="@{/account}" class="nav-link"><i class="bi bi-person"></i> Mi cuenta</a>
+        <form th:action="@{/logout}" method="post" class="m-0">
+            <button type="submit" class="nav-link" style="background:none;border:0;font-family:inherit">Salir</button>
+        </form>
     </div>
 </nav>
 
@@ -769,7 +773,7 @@
                 menuBtn.focus();
             }
         });
-        window.matchMedia('(min-width: 993px)').addEventListener('change', function() {
+        window.matchMedia('(min-width: 1200px)').addEventListener('change', function() {
             setMenu(false);
         });
     });

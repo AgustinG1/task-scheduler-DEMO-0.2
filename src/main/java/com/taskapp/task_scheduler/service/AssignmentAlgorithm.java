@@ -21,6 +21,7 @@ public class AssignmentAlgorithm {
     private final PayrollRepository payrollRepository;
     private final AssignmentRepository assignmentRepository;
     private final TeamRepository teamRepository; // Agregado para el Equipo
+    private final com.taskapp.task_scheduler.security.OwnerAccess owners;
 
     @Transactional
     public Payroll generatePayroll(int totalWeeks, Long teamId) {
@@ -29,10 +30,14 @@ public class AssignmentAlgorithm {
         }
 
         // 1. Filtrar por Equipo
-        Team team = teamRepository.findById(teamId).orElseThrow();
-        List<Employee> empleadosRaw = employeeRepository.findByActiveTrue().stream()
+        Long ownerId = owners.id();
+        var owner = owners.lock(ownerId);
+        Team team = owners.require(teamRepository.findByIdAndOwner_Id(teamId, ownerId));
+        owners.team(team, ownerId);
+        List<Employee> empleadosRaw = employeeRepository.findByOwner_IdAndActiveTrue(ownerId).stream()
                 .filter(emp -> team.getAreas() != null && team.getAreas().contains(emp.getArea()))
                 .collect(Collectors.toList());
+        empleadosRaw.forEach(employee -> owners.employee(employee, ownerId));
 
         List<Task> tareas = new ArrayList<>();
         if (team.getTaskGroups() != null) {
@@ -44,12 +49,13 @@ public class AssignmentAlgorithm {
 
         validator.validar(empleadosRaw, tareas);
 
-        payrollRepository.findByStatus(PayrollStatus.ACTIVE).forEach(p -> {
+        payrollRepository.findByOwner_IdAndStatus(ownerId, PayrollStatus.ACTIVE).forEach(p -> {
             p.setStatus(PayrollStatus.ARCHIVED);
             payrollRepository.save(p);
         });
 
         Payroll payroll = new Payroll();
+        payroll.setOwner(owner);
         payroll.setTeam(team);
         payroll.setStatus(PayrollStatus.ACTIVE);
         payroll.setStartDate(LocalDate.now());

@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{account/shell :: head('Acceso no disponible')}"></head>
+<body>
+<header th:replace="~{account/shell :: header}"></header>
+<main class="auth-layout">
+    <section class="intro">
+        <p class="eyebrow">TaskScheduler</p>
+        <h1>Acceso <span>no disponible.</span></h1>
+        <p class="intro-copy">Esta cuenta no puede realizar la operación solicitada en este momento.</p>
+    </section>
+    <section class="auth-card" aria-labelledby="return-title">
+        <h2 id="return-title">Vuelve a tu cuenta</h2>
+        <p class="card-copy">Puedes regresar al inicio o cerrar la sesión para volver a entrar.</p>
+        <div class="actions">
+            <a class="button" th:href="@{/}">Volver al inicio</a>
+            <form th:action="@{/logout}" method="post"><button class="button secondary" type="submit">Cerrar sesión</button></form>
+        </div>
+    </section>
+</main>
+<footer th:replace="~{account/shell :: footer}"></footer>
+</body>
+</html>

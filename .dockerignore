@@ -3,7 +3,9 @@
 .idea
 .vscode
 target
+evidencias
 data
+backups
 .env
 *.iml
 *.log

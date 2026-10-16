@@ -15,14 +15,14 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "equipos") // Siguiendo tu convención de nombres en español
-public class Team {
+@Table(name = "equipos", uniqueConstraints = @UniqueConstraint(name = "uk_equipo_owner_nombre", columnNames = {"owner_id", "nombre"})) // Siguiendo tu convención de nombres en español
+public class Team extends OwnedEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "nombre", nullable = false, unique = true, length = 100)
+    @Column(name = "nombre", nullable = false, length = 100)
     @NotBlank(message = "El nombre del equipo es obligatorio")
     private String name; // Ej: "Sucursal Macul - Turno Mañana"
 

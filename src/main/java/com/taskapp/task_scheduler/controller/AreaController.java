@@ -16,6 +16,11 @@ public class AreaController {
     private final AreaService areaService;
     private final com.taskapp.task_scheduler.service.EmployeeService employeeService;
 
+    @InitBinder
+    void fields(org.springframework.web.bind.WebDataBinder binder) {
+        binder.setAllowedFields("nombre", "descripcion");
+    }
+
     // 1. Mostrar la página con la tabla de áreas y el formulario de creación
     @GetMapping
     public String listar(Model model) {
@@ -36,7 +41,7 @@ public class AreaController {
     }
 
     // 3. Eliminar un área
-    @GetMapping("/eliminar/{id}")
+    @PostMapping("/eliminar/{id}")
     public String eliminar(@PathVariable Long id) {
         areaService.deleteArea(id);
         return "redirect:/areas";

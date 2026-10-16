@@ -1,92 +1,111 @@
 package com.taskapp.task_scheduler.service;
 
+import java.util.List;
+import com.taskapp.task_scheduler.model.*;
+import com.taskapp.task_scheduler.repository.*;
+import com.taskapp.task_scheduler.security.OwnerAccess;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
-import java.util.List;
-
-import com.taskapp.task_scheduler.model.Area;
-import com.taskapp.task_scheduler.model.Assignment;
-import com.taskapp.task_scheduler.model.AssignmentStatus;
-import com.taskapp.task_scheduler.model.Task;
-import com.taskapp.task_scheduler.model.TaskArea;
-import com.taskapp.task_scheduler.model.TaskAreaId;
-import com.taskapp.task_scheduler.model.TaskType;
-import com.taskapp.task_scheduler.repository.AreaRepository;
-import com.taskapp.task_scheduler.repository.AssignmentRepository;
-import com.taskapp.task_scheduler.repository.TaskAreaRepository;
-import com.taskapp.task_scheduler.repository.TaskRepository;
 
 @Service
 @RequiredArgsConstructor
 public class TaskService {
-
     private final TaskRepository taskRepository;
     private final AreaRepository areaRepository;
-    private final TaskAreaRepository taskAreaRepository;    
+    private final TaskAreaRepository taskAreaRepository;
     private final AssignmentRepository assignmentRepository;
+    private final OwnerAccess owners;
 
-    // 1. Traer todas las tareas
     public List<Task> getAllTasks() {
-        return taskRepository.findAll();
+        Long ownerId = owners.id();
+        var tasks = taskRepository.findAllByOwner_Id(ownerId);
+        tasks.forEach(t -> owners.task(t, ownerId));
+        return tasks;
     }
 
-    // 2. Buscar por ID (lanza excepción si no existe)
     public Task getTaskById(Long id) {
-        return taskRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Error: No se encontró la tarea con ID " + id));
+        Long ownerId = owners.id();
+        Task task = owners.require(taskRepository.findByIdAndOwner_Id(id, ownerId));
+        owners.task(task, ownerId);
+        return task;
     }
 
-    // 3. Filtrar tareas por tipo (GENERAL o SPECIFIC) usando el método que creaste
     public List<Task> getTasksByType(TaskType type) {
-        return taskRepository.findByType(type);
+        Long ownerId = owners.id();
+        var tasks = taskRepository.findByOwner_IdAndType(ownerId, type);
+        tasks.forEach(t -> owners.task(t, ownerId));
+        return tasks;
     }
 
-    // 4. Crear una nueva tarea
-    public Task createTask(Task task) {
+    @Transactional
+    public Task createTask(Task input) { return createTask(input, null); }
+
+    @Transactional
+    public Task createTask(Task input, Long areaId) {
+        Long ownerId = owners.id();
+        var owner = owners.lock(ownerId);
+        Area area = areaId == null ? null : owners.require(areaRepository.findByIdAndOwner_Id(areaId, ownerId));
+        Task task = new Task();
+        task.setName(input.getName());
+        task.setDescription(input.getDescription());
+        task.setType(input.getType());
+        task.setOwner(owner);
+        task = taskRepository.save(task);
+        if (task.getType() == TaskType.SPECIFIC && area != null) link(task, area);
+        return task;
+    }
+
+    @Transactional
+    public Task updateTask(Long id, Task input) {
+        Long ownerId = owners.id();
+        owners.lock(ownerId);
+        Task task = owners.require(taskRepository.findByIdAndOwner_Id(id, ownerId));
+        owners.task(task, ownerId);
+        task.setName(input.getName());
+        task.setDescription(input.getDescription());
+        task.setType(input.getType());
+        if (task.getType() == TaskType.GENERAL) {
+            taskAreaRepository.deleteByTaskId(id);
+            task.getAuthorizedAreas().clear();
+        }
         return taskRepository.save(task);
     }
 
-    // 5. Actualizar los datos de una tarea existente
-    public Task updateTask(Long id, Task tareaActualizada) {
-        Task tareaExistente = getTaskById(id);
-        
-        tareaExistente.setName(tareaActualizada.getName());
-        tareaExistente.setDescription(tareaActualizada.getDescription());
-        tareaExistente.setType(tareaActualizada.getType());
-        
-        return taskRepository.save(tareaExistente);
-    }
-
-    // 6. Eliminar una tarea por ID (CORREGIDO PARA EVITAR ERROR 500)
     @Transactional
     public void deleteTask(Long id) {
-        Task tarea = getTaskById(id);
-        
-        // A. PASO CLAVE: Borramos los vínculos de áreas en la base de datos primero
+        Long ownerId = owners.id();
+        owners.lock(ownerId);
+        Task task = owners.require(taskRepository.findByIdAndOwner_Id(id, ownerId));
+        owners.task(task, ownerId);
+        task.getTaskGroups().forEach(group -> owners.check(group, ownerId));
+        task.getTeams().forEach(team -> owners.check(team, ownerId));
+        var assignments = assignmentRepository.findByTask_IdAndPayroll_Owner_Id(id, ownerId);
+        assignments.forEach(a -> owners.employee(a.getEmployee(), ownerId));
         taskAreaRepository.deleteByTaskId(id);
-        
-        // B. Protegemos el historial: los turnos que tenían esta tarea pasan a ser DESCANSO
-        List<Assignment> asignaciones = assignmentRepository.findByTaskId(id);
-        for (Assignment asignacion : asignaciones) {
-            asignacion.setTask(null);
-            asignacion.setStatus(AssignmentStatus.REST);
-            assignmentRepository.save(asignacion);
+        task.getAuthorizedAreas().clear();
+        for (Assignment assignment : assignments) {
+            assignment.setTask(null);
+            assignment.setStatus(AssignmentStatus.REST);
         }
-        
-        // C. Ahora sí borramos la tarea
-        taskRepository.delete(tarea);
+        task.getTeams().clear();
+        taskRepository.delete(task);
     }
 
-    // 7. Vincular un área específica a una tarea
-    public void vincularArea(Task task, Long areaId) {
-        Area area = areaRepository.findById(areaId)
-                .orElseThrow(() -> new RuntimeException("Área no encontrada"));
-        
-        TaskArea taskArea = new TaskArea();
-        taskArea.setId(new TaskAreaId(task.getId(), area.getId()));
-        taskArea.setTask(task);
-        taskArea.setArea(area);
-        taskAreaRepository.save(taskArea);
+    @Transactional
+    public void vincularArea(Task input, Long areaId) {
+        Long ownerId = owners.id();
+        owners.lock(ownerId);
+        Task task = owners.require(taskRepository.findByIdAndOwner_Id(input.getId(), ownerId));
+        Area area = owners.require(areaRepository.findByIdAndOwner_Id(areaId, ownerId));
+        link(task, area);
+    }
+
+    private void link(Task task, Area area) {
+        TaskArea link = new TaskArea();
+        link.setId(new TaskAreaId(task.getId(), area.getId()));
+        link.setTask(task);
+        link.setArea(area);
+        taskAreaRepository.save(link);
     }
 }

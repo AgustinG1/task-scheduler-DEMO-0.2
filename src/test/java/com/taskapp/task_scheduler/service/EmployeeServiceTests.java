@@ -23,6 +23,16 @@ class EmployeeServiceTests {
     @Mock
     private EmployeeRepository employeeRepository;
 
+    @Mock private com.taskapp.task_scheduler.repository.AreaRepository areaRepository;
+    @Mock private com.taskapp.task_scheduler.security.OwnerAccess owners;
+
+    @org.junit.jupiter.api.BeforeEach
+    void authenticatedOwner() {
+        org.mockito.Mockito.lenient().when(owners.id()).thenReturn(1L);
+        org.mockito.Mockito.lenient().when(owners.require(org.mockito.ArgumentMatchers.any()))
+                .thenAnswer(call -> ((Optional<?>) call.getArgument(0)).orElseThrow());
+    }
+
     @InjectMocks
     private EmployeeService employeeService;
 
@@ -31,11 +41,11 @@ class EmployeeServiceTests {
         Employee active = new Employee();
         active.setId(1L);
         active.setActive(true);
-        when(employeeRepository.findByActiveTrue()).thenReturn(List.of(active));
+        when(employeeRepository.findByOwner_IdAndActiveTrue(1L)).thenReturn(List.of(active));
 
         assertEquals(List.of(active), employeeService.getAllEmployees());
 
-        verify(employeeRepository).findByActiveTrue();
+        verify(employeeRepository).findByOwner_IdAndActiveTrue(1L);
         verify(employeeRepository, never()).findAll();
     }
 
@@ -44,7 +54,7 @@ class EmployeeServiceTests {
         Employee employee = new Employee();
         employee.setId(5L);
         employee.setActive(true);
-        when(employeeRepository.findById(5L)).thenReturn(Optional.of(employee));
+        when(employeeRepository.findByIdAndOwner_Id(5L, 1L)).thenReturn(Optional.of(employee));
 
         employeeService.deactivateEmployee(5L);
 

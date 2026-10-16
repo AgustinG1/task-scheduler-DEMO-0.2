@@ -16,7 +16,7 @@ import java.util.List;
 @NoArgsConstructor
 @Entity
 @Table(name = "catalogos_tareas") // Usamos nombres en español para la BD
-public class TaskGroup {
+public class TaskGroup extends OwnedEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

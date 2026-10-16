@@ -5,6 +5,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface TeamRepository extends JpaRepository<Team, Long> {
+public interface TeamRepository extends OwnedRepository<Team> {
     // Spring Data JPA nos regala el save(), findAll(), deleteById(), etc.
 }

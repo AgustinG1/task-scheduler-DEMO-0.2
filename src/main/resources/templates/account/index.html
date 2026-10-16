@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{account/shell :: head('Acceso personal')}"></head>
+<body>
+<header th:replace="~{account/shell :: header}"></header>
+<main class="auth-layout">
+    <section class="intro" aria-labelledby="welcome-title">
+        <p class="eyebrow">Tu cuenta, a tu manera</p>
+        <h1 id="welcome-title">Todo empieza <span>con tu cuenta.</span></h1>
+        <p class="intro-copy">Un lugar para entrar, consultar tu perfil y continuar cuando lo necesites.</p>
+        <ol class="journey" aria-label="Pasos de acceso">
+            <li><span class="step-number" aria-hidden="true">01</span>Entra o crea tu cuenta</li>
+            <li><span class="step-number" aria-hidden="true">02</span>Consulta tu perfil</li>
+            <li><span class="step-number" aria-hidden="true">03</span>Cierra sesión cuando termines</li>
+        </ol>
+    </section>
+    <section class="auth-card" aria-labelledby="access-title">
+        <div class="card-top">
+            <span class="icon-tile" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3M12 14v3"/></svg></span>
+            <span class="status" th:if="${signedIn}">Sesión iniciada</span>
+        </div>
+        <h2 id="access-title" th:text="${signedIn ? 'Ya estás dentro' : 'Te damos la bienvenida'}">Te damos la bienvenida</h2>
+        <p class="card-copy" th:text="${signedIn ? 'Tu cuenta está conectada. Puedes consultar tu perfil o cerrar esta sesión.' : 'Usa tu cuenta para iniciar sesión. Si es tu primera vez, puedes crear una en el siguiente paso.'}">Usa tu cuenta para iniciar sesión.</p>
+        <p class="card-note" th:if="${param.loginError}" role="alert">No pudimos completar el acceso. Vuelve a intentarlo.</p>
+        <p class="card-note" th:unless="${loginAvailable}">El acceso está temporalmente fuera de servicio. Inténtalo más tarde.</p>
+        <div class="actions" th:if="${!signedIn and loginAvailable}">
+            <a class="button" th:href="@{/oauth2/authorization/auth0}">Entrar o crear una cuenta <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></a>
+        </div>
+        <div class="actions" th:if="${signedIn}">
+            <a class="button" th:href="@{/account}">Ver mi perfil <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></a>
+            <form th:action="@{/logout}" method="post"><button type="submit" class="button secondary">Cerrar sesión</button></form>
+        </div>
+        <p class="card-note"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 8 3v6c0 4-5 8-8 9-3-1-8-5-8-9V6l8-3Z"/><path d="m8 12 3 3 5-5"/></svg><span th:text="${signedIn ? 'En un equipo compartido, recuerda cerrar sesión al terminar.' : 'Continuarás en Auth0 para acceder a tu cuenta de forma segura.'}">Continuarás en Auth0 para acceder a tu cuenta de forma segura.</span></p>
+    </section>
+</main>
+<footer th:replace="~{account/shell :: footer}"></footer>
+</body>
+</html>

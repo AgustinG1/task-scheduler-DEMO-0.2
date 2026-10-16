@@ -21,9 +21,10 @@ public class ExcelExportService {
 
     private final AssignmentRepository assignmentRepository;
     private final TaskRepository taskRepository;
+    private final PayrollService payrollService;
 
     public byte[] generateExcelForPayroll(Long payrollId) {
-        List<Assignment> assignments = assignmentRepository.findByPayrollId(payrollId);
+        List<Assignment> assignments = payrollService.getAssignments(payrollId);
         
         // Extraer dinámicamente solo las tareas del equipo activo
         List<Task> tasks = assignments.stream()
@@ -31,10 +32,6 @@ public class ExcelExportService {
                 .filter(Objects::nonNull)
                 .distinct()
                 .collect(Collectors.toList());
-
-        if (tasks.isEmpty()) {
-            tasks = taskRepository.findAll();
-        }
 
         try (Workbook workbook = new XSSFWorkbook(); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
             Sheet sheet = workbook.createSheet("Matriz de Turnos");

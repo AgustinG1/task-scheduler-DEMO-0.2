@@ -21,15 +21,17 @@ public class HomeController {
     private final TaskGroupRepository taskGroupRepository;
     private final TeamRepository teamRepository;
     private final PayrollRepository payrollRepository;
+    private final com.taskapp.task_scheduler.security.OwnerAccess owners;
 
-    @GetMapping("/")
+    @GetMapping("/app")
     public String index(Model model) {
-        long areasCount = areaRepository.count();
-        long tasksCount = taskRepository.count();
-        long employeesCount = employeeRepository.countByActiveTrue();
-        long groupsCount = taskGroupRepository.count();
-        long teamsCount = teamRepository.count();
-        long payrollsCount = payrollRepository.count();
+        Long ownerId = owners.id();
+        long areasCount = areaRepository.countByOwner_Id(ownerId);
+        long tasksCount = taskRepository.countByOwner_Id(ownerId);
+        long employeesCount = employeeRepository.countByOwner_IdAndActiveTrue(ownerId);
+        long groupsCount = taskGroupRepository.countByOwner_Id(ownerId);
+        long teamsCount = teamRepository.countByOwner_Id(ownerId);
+        long payrollsCount = payrollRepository.countByOwner_Id(ownerId);
         long modulosConDatos = 0;
 
         if (areasCount > 0) {

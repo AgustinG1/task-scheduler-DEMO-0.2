@@ -36,24 +36,24 @@
                 </thead>
                 <tbody>
                     <tr th:each="p : ${planillas}">
-                        <td style="color:var(--text-muted); font-family:var(--font-mono)" th:text="'#' + ${p.id}"></td>
-                        <td th:text="${p.startDate}"></td>
-                        <td th:text="${p.endDate}"></td>
-                        <td>
+                        <td data-label="ID" style="color:var(--text-muted); font-family:var(--font-mono)" th:text="'#' + ${p.id}"></td>
+                        <td data-label="Fecha de inicio" th:text="${p.startDate}"></td>
+                        <td data-label="Fecha de fin" th:text="${p.endDate}"></td>
+                        <td data-label="Estado">
                             <span th:class="${p.status.name() == 'ACTIVE' ? 'badge-general' : 'badge-rest'}" 
                                   th:text="${p.status}"></span>
                         </td>
-                        <td style="color:var(--text-secondary)" th:text="${#temporals.format(p.generatedAt, 'dd-MM-yyyy HH:mm')}"></td>
+                        <td data-label="Generada el" style="color:var(--text-secondary)" th:text="${#temporals.format(p.generatedAt, 'dd-MM-yyyy HH:mm')}"></td>
                         
-                        <td style="display: flex; gap: 8px; justify-content: center;">
-                            <a th:href="@{/api/payrolls/{id}/download(id=${p.id})}" class="btn-ghost" style="color: var(--success); padding: 6px 10px;" title="Descargar Matriz CSV">
-                                <i class="bi bi-filetype-csv"></i>
+                        <td data-label="Acciones" style="display: flex; gap: 8px; justify-content: center;">
+                            <a th:href="@{/api/payrolls/{id}/download(id=${p.id})}" class="btn-ghost" style="color: var(--success); padding: 6px 10px;" title="Descargar matriz Excel" aria-label="Descargar matriz Excel">
+                                <i class="bi bi-file-earmark-excel"></i>
                             </a>
                             
-                            <a th:href="@{/payroll/eliminar/{id}(id=${p.id})}" class="btn-danger-ghost"
+                            <form th:action="@{/payroll/eliminar/{id}(id=${p.id})}" method="post" class="m-0"><button type="submit" class="btn-danger-ghost"
                                onclick="return confirm('¿Estás seguro de eliminar esta planilla? También se borrarán todos los turnos asignados a ella de forma permanente.')" title="Eliminar Planilla">
                                 <i class="bi bi-trash"></i>
-                            </a>
+                            </button></form>
                         </td>
                     </tr>
                 </tbody>

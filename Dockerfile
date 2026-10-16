@@ -3,7 +3,10 @@ FROM maven:3.9.6-eclipse-temurin-17 AS build
 WORKDIR /app
 COPY pom.xml .
 COPY src ./src
-RUN mvn clean package -DskipTests
+COPY libraries/personal-auth-core/pom.xml ./libraries/personal-auth-core/pom.xml
+COPY libraries/personal-auth-core/src ./libraries/personal-auth-core/src
+RUN mvn -B -ntp -f libraries/personal-auth-core/pom.xml install -DskipTests
+RUN mvn -B -ntp clean package -DskipTests
 
 # Etapa 2: Producción (Crea una caja ligera solo con lo necesario para correr el sistema)
 FROM eclipse-temurin:17-jre

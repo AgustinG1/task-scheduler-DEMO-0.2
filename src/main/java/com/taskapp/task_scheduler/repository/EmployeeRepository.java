@@ -7,7 +7,7 @@ import java.util.List;
 
 
 @Repository
-public interface EmployeeRepository extends JpaRepository<Employee, Long> {
+public interface EmployeeRepository extends OwnedRepository<Employee> {
     
     // Método 1: Traer todos los empleados de un área específica.
     // Spring genera: SELECT * FROM empleados WHERE area_id = ?
@@ -22,5 +22,9 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
     List<Employee> findByActiveTrue();
 
     long countByActiveTrue();
+
+    List<Employee> findByOwner_IdAndActiveTrue(Long ownerId);
+    List<Employee> findByOwner_IdAndArea_Id(Long ownerId, Long areaId);
+    long countByOwner_IdAndActiveTrue(Long ownerId);
 
 }

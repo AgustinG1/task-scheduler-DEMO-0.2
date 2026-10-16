@@ -66,7 +66,7 @@
                 </span>
                 
                 <a th:href="@{/api/payrolls/{id}/download(id=${planilla.id})}" class="btn-ghost" style="padding: 4px 12px; color: var(--success); border-color: var(--success);">
-                    <i class="bi bi-filetype-csv me-1"></i> Descargar CSV
+                    <i class="bi bi-file-earmark-excel me-1"></i> Descargar Excel
                 </a>
             </div>
             
@@ -86,11 +86,11 @@
                     <tbody>
                         <tr th:each="semanaNum : ${#numbers.sequence(1, totalSemanas)}">
                             
-                            <td style="background: var(--bg-elevated); font-weight: 600; color: var(--text-secondary); position: sticky; left: 0; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border);" 
+                            <td data-label="Semana" style="background: var(--bg-elevated); font-weight: 600; color: var(--text-secondary); position: sticky; left: 0; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border);"
                                 th:text="'Semana ' + ${semanaNum}">
                             </td>
                             
-                            <td th:each="tarea : ${tareas}" style="border-left: 1px solid var(--border); border-bottom: 1px solid var(--border);">
+                            <td th:each="tarea : ${tareas}" th:attr="data-label=${tarea.name}" style="border-left: 1px solid var(--border); border-bottom: 1px solid var(--border);">
                                 <span th:each="asig : ${asignaciones}" 
                                       th:if="${asig.weekNumber == semanaNum && asig.task != null && asig.task.id == tarea.id}"
                                       th:text="${asig.employee.name}"
@@ -98,7 +98,7 @@
                                 </span>
                             </td>
                             
-                            <td style="background: rgba(239,68,68,0.02); border-left: 1px solid var(--border); border-bottom: 1px solid var(--border);">
+                            <td data-label="En descanso" style="background: rgba(239,68,68,0.02); border-left: 1px solid var(--border); border-bottom: 1px solid var(--border);">
                                 <span th:each="asig : ${asignaciones}"
                                       th:if="${asig.weekNumber == semanaNum && asig.task == null}"
                                       th:text="${asig.employee.name}"

@@ -65,10 +65,10 @@
                                 <a th:href="@{/task-groups/editar/{id}(id=${cat.id})}" class="btn-primary-dark w-100 text-center" style="padding: 6px;">
                                     <i class="bi bi-gear"></i> Configurar Tareas
                                 </a>
-                                <a th:href="@{/task-groups/eliminar/{id}(id=${cat.id})}" class="btn-danger-ghost" style="padding: 6px 12px;"
+                                <form th:action="@{/task-groups/eliminar/{id}(id=${cat.id})}" method="post" class="m-0"><button type="submit" class="btn-danger-ghost" style="padding: 6px 12px;"
                                    onclick="return confirm('¿Eliminar este catálogo? No se borrarán las tareas del sistema, solo la agrupación.')">
                                     <i class="bi bi-trash"></i>
-                                </a>
+                                </button></form>
                             </div>
                         </div>
                     </div>

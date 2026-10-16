@@ -15,7 +15,7 @@ import java.util.List;
 @NoArgsConstructor
 @Entity
 @Table(name = "areas")
-public class Area {
+public class Area extends OwnedEntity {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

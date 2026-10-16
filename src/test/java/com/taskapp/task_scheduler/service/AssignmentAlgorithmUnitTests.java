@@ -56,7 +56,15 @@ class AssignmentAlgorithmUnitTests {
     @Mock private AssignmentRepository assignmentRepository;
     @Mock private TeamRepository teamRepository;
 
+    @Mock private com.taskapp.task_scheduler.security.OwnerAccess owners;
     @InjectMocks private AssignmentAlgorithm algorithm;
+
+    @org.junit.jupiter.api.BeforeEach
+    void authenticatedOwner() {
+        org.mockito.Mockito.lenient().when(owners.id()).thenReturn(1L);
+        org.mockito.Mockito.lenient().when(owners.require(org.mockito.ArgumentMatchers.any()))
+                .thenAnswer(call -> ((Optional<?>) call.getArgument(0)).orElseThrow());
+    }
 
     @ParameterizedTest
     @ValueSource(ints = {-1, 0, 53})
@@ -73,8 +81,8 @@ class AssignmentAlgorithmUnitTests {
         Employee employee = employee(1L, area);
         Task task = generalTask(1L, "Tarea");
         Team team = team(1L, List.of(area), List.of(task));
-        when(teamRepository.findById(team.getId())).thenReturn(Optional.of(team));
-        when(employeeRepository.findByActiveTrue()).thenReturn(List.of(employee));
+        when(teamRepository.findByIdAndOwner_Id(team.getId(), 1L)).thenReturn(Optional.of(team));
+        when(employeeRepository.findByOwner_IdAndActiveTrue(1L)).thenReturn(List.of(employee));
         doThrow(new IllegalStateException("Configuración inviable"))
                 .when(validator).validar(any(), any());
 
@@ -128,7 +136,7 @@ class AssignmentAlgorithmUnitTests {
         Payroll generated = algorithm.generatePayroll(2, team.getId());
 
         var order = inOrder(payrollRepository, assignmentRepository);
-        order.verify(payrollRepository).findByStatus(PayrollStatus.ACTIVE);
+        order.verify(payrollRepository).findByOwner_IdAndStatus(1L, PayrollStatus.ACTIVE);
         order.verify(payrollRepository).save(previous);
         order.verify(payrollRepository).save(generated);
         order.verify(assignmentRepository, times(2)).save(any(Assignment.class));
@@ -229,9 +237,9 @@ class AssignmentAlgorithmUnitTests {
     }
 
     private void prepareSuccessfulGeneration(Team team, List<Employee> employees, List<Payroll> activePayrolls) {
-        when(teamRepository.findById(team.getId())).thenReturn(Optional.of(team));
-        when(employeeRepository.findByActiveTrue()).thenReturn(employees);
-        when(payrollRepository.findByStatus(PayrollStatus.ACTIVE)).thenReturn(activePayrolls);
+        when(teamRepository.findByIdAndOwner_Id(team.getId(), 1L)).thenReturn(Optional.of(team));
+        when(employeeRepository.findByOwner_IdAndActiveTrue(1L)).thenReturn(employees);
+        when(payrollRepository.findByOwner_IdAndStatus(1L, PayrollStatus.ACTIVE)).thenReturn(activePayrolls);
         AtomicLong ids = new AtomicLong(100L);
         when(payrollRepository.save(any(Payroll.class))).thenAnswer(invocation -> {
             Payroll payroll = invocation.getArgument(0);

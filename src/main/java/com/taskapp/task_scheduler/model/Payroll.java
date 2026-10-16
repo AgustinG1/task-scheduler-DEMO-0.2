@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Entity
 @Table(name = "planillas")
-public class Payroll {
+public class Payroll extends OwnedEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -1,60 +1,77 @@
 package com.taskapp.task_scheduler.service;
 
+import java.util.List;
+import com.taskapp.task_scheduler.model.Employee;
+import com.taskapp.task_scheduler.repository.AreaRepository;
+import com.taskapp.task_scheduler.repository.EmployeeRepository;
+import com.taskapp.task_scheduler.security.OwnerAccess;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
-import java.util.List;
-
-import com.taskapp.task_scheduler.model.Employee;
-import com.taskapp.task_scheduler.repository.EmployeeRepository;
 
 @Service
 @RequiredArgsConstructor
 public class EmployeeService {
-
     private final EmployeeRepository employeeRepository;
+    private final AreaRepository areaRepository;
+    private final OwnerAccess owners;
 
-    // 1. Traer todos los empleados
     public List<Employee> getAllEmployees() {
-        return employeeRepository.findByActiveTrue();
+        Long ownerId = owners.id();
+        var result = employeeRepository.findByOwner_IdAndActiveTrue(ownerId);
+        result.forEach(e -> owners.employee(e, ownerId));
+        return result;
     }
 
-    // 2. Buscar empleado por ID
     public Employee getEmployeeById(Long id) {
-        return employeeRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Error: No se encontró el empleado con ID " + id));
+        Long ownerId = owners.id();
+        Employee employee = owners.require(employeeRepository.findByIdAndOwner_Id(id, ownerId));
+        owners.employee(employee, ownerId);
+        return employee;
     }
 
-    // 3. Traer empleados de un área específica (Usando el método que creaste en el Repositorio)
     public List<Employee> getEmployeesByArea(Long areaId) {
-        return employeeRepository.findByAreaId(areaId);
+        Long ownerId = owners.id();
+        owners.require(areaRepository.findByIdAndOwner_Id(areaId, ownerId));
+        var result = employeeRepository.findByOwner_IdAndArea_Id(ownerId, areaId);
+        result.forEach(e -> owners.employee(e, ownerId));
+        return result;
     }
 
-    // 4. Crear un nuevo empleado
-    public Employee createEmployee(Employee employee) {
-        // Por defecto, al crear a alguien, debería estar activo
+    @Transactional
+    public Employee createEmployee(Employee input) {
+        Long ownerId = owners.id();
+        var owner = owners.lock(ownerId);
+        var area = owners.require(areaRepository.findByIdAndOwner_Id(
+                input.getArea() == null ? null : input.getArea().getId(), ownerId));
+        Employee employee = new Employee();
+        employee.setName(input.getName());
+        employee.setApellido(input.getApellido());
+        employee.setArea(area);
         employee.setActive(true);
+        employee.setOwner(owner);
         return employeeRepository.save(employee);
     }
 
-    // 5. Actualizar datos del empleado
-    public Employee updateEmployee(Long id, Employee empleadoActualizado) {
-        Employee empleadoExistente = getEmployeeById(id);
-        
-        // Actualizamos los campos (nombre, apellido y área)
-        empleadoExistente.setName(empleadoActualizado.getName());
-        empleadoExistente.setApellido(empleadoActualizado.getApellido());
-        empleadoExistente.setArea(empleadoActualizado.getArea());
-        
-        return employeeRepository.save(empleadoExistente);
+    @Transactional
+    public Employee updateEmployee(Long id, Employee input) {
+        Long ownerId = owners.id();
+        owners.lock(ownerId);
+        Employee employee = owners.require(employeeRepository.findByIdAndOwner_Id(id, ownerId));
+        var area = owners.require(areaRepository.findByIdAndOwner_Id(
+                input.getArea() == null ? null : input.getArea().getId(), ownerId));
+        employee.setName(input.getName());
+        employee.setApellido(input.getApellido());
+        employee.setArea(area);
+        return employeeRepository.save(employee);
     }
 
-    // 6. Desactivar empleado (Borrado Lógico)
-    // NO usamos employeeRepository.delete() para no romper las planillas históricas
     @Transactional
     public void deactivateEmployee(Long id) {
-        Employee empleado = getEmployeeById(id);
-        empleado.setActive(false);
-        employeeRepository.save(empleado);
+        Long ownerId = owners.id();
+        owners.lock(ownerId);
+        Employee employee = owners.require(employeeRepository.findByIdAndOwner_Id(id, ownerId));
+        employee.setActive(false);
+        employeeRepository.save(employee);
     }
 }

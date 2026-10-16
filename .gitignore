@@ -40,6 +40,8 @@ build/
 *.md
 !/README.md
 /docs/
+/evidencias/
 /intro.docx
 /data/
+/backups/
 /src/main/java/com/taskapp/task_scheduler/service/algoritmoantes.txt

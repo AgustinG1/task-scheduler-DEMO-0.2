@@ -15,7 +15,7 @@ import java.util.List;
 @NoArgsConstructor
 @Entity
 @Table(name = "tareas")
-public class Task {
+public class Task extends OwnedEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

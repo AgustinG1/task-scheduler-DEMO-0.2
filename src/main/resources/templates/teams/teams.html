@@ -97,10 +97,10 @@
                             <a th:href="@{/teams/editar/{id}(id=${e.id})}" class="btn-ghost w-100 justify-content-center" style="color: var(--accent); padding: 8px;" title="Configurar Equipo">
                                 <i class="bi bi-pencil-square"></i>
                             </a>
-                            <a th:href="@{/teams/eliminar/{id}(id=${e.id})}" class="btn-danger-ghost w-100 justify-content-center" style="padding: 8px;"
+                            <form th:action="@{/teams/eliminar/{id}(id=${e.id})}" method="post" class="m-0"><button type="submit" class="btn-danger-ghost w-100 justify-content-center" style="padding: 8px;"
                                onclick="return confirm('¿Estás seguro?')" title="Eliminar Equipo">
                                 <i class="bi bi-trash"></i>
-                            </a>
+                            </button></form>
                         </td>
                     </tr>
                 </tbody>

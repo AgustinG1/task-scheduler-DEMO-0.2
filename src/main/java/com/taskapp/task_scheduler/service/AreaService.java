@@ -1,55 +1,50 @@
 package com.taskapp.task_scheduler.service;
 
-import org.springframework.stereotype.Service;
-import lombok.RequiredArgsConstructor;
 import java.util.List;
-
 import com.taskapp.task_scheduler.model.Area;
 import com.taskapp.task_scheduler.repository.AreaRepository;
+import com.taskapp.task_scheduler.security.OwnerAccess;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import lombok.RequiredArgsConstructor;
 
 @Service
-@RequiredArgsConstructor // Magia de Lombok: crea el constructor para inyectar el repositorio
+@RequiredArgsConstructor
 public class AreaService {
-
-    // Traemos a nuestro "recepcionista" de la base de datos de áreas
     private final AreaRepository areaRepository;
-     
+    private final OwnerAccess owners;
 
-    // 1. Traer todas las áreas
-    public List<Area> getAllAreas() {
-        return areaRepository.findAll();
-    }
+    public List<Area> getAllAreas() { return areaRepository.findAllByOwner_Id(owners.id()); }
 
-    // 2. Buscar por ID (o lanzar error si no existe)
     public Area getAreaById(Long id) {
-        // findById devuelve un Optional. Con orElseThrow decimos: "dámelo, o explota con este mensaje"
-        return areaRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Error: No se encontró el área con ID " + id));
+        return owners.require(areaRepository.findByIdAndOwner_Id(id, owners.id()));
     }
 
-    // 3. Crear una nueva área
-    public Area createArea(Area area) {
-        // Podemos agregar reglas aquí en el futuro (ej. que no se repita el nombre)
-        return areaRepository.save(area); 
+    @Transactional
+    public Area createArea(Area input) {
+        Long ownerId = owners.id();
+        var owner = owners.lock(ownerId);
+        Area area = new Area();
+        area.setNombre(input.getNombre());
+        area.setDescripcion(input.getDescripcion());
+        area.setOwner(owner);
+        return areaRepository.save(area);
     }
 
-    // 4. Actualizar un área existente
-    public Area updateArea(Long id, Area areaActualizada) {
-        // Paso A: Buscamos el área original usando el método que ya creamos arriba
-        Area areaExistente = getAreaById(id);
-        
-        // Paso B: Le cambiamos los datos por los nuevos
-        areaExistente.setNombre(areaActualizada.getNombre());
-        areaExistente.setDescripcion(areaActualizada.getDescripcion());
-        
-        // Paso C: Guardamos los cambios
-        return areaRepository.save(areaExistente);
+    @Transactional
+    public Area updateArea(Long id, Area input) {
+        Long ownerId = owners.id();
+        owners.lock(ownerId);
+        Area area = owners.require(areaRepository.findByIdAndOwner_Id(id, ownerId));
+        area.setNombre(input.getNombre());
+        area.setDescripcion(input.getDescripcion());
+        return areaRepository.save(area);
     }
 
-    // 5. Eliminar un área (Físicamente)
+    @Transactional
     public void deleteArea(Long id) {
-        // Primero verificamos que exista
-        Area area = getAreaById(id);
-        areaRepository.delete(area);
+        Long ownerId = owners.id();
+        owners.lock(ownerId);
+        areaRepository.delete(owners.require(areaRepository.findByIdAndOwner_Id(id, ownerId)));
     }
 }

@@ -42,7 +42,8 @@ public String guardar(@RequestParam("nombre") String nombre,
     employee.setName(nombre);
     
     if (areaId != null) {
-        Area area = areaService.getAreaById(areaId);
+        Area area = new Area();
+        area.setId(areaId);
         employee.setArea(area);
     } else {
         employee.setArea(null);
@@ -57,10 +58,6 @@ public String guardar(@RequestParam("nombre") String nombre,
     @GetMapping("/editar/{id}")
     public String formularioEditar(@PathVariable Long id, Model model) {
         Employee emp = employeeService.getEmployeeById(id);
-        // Si por alguna razón el área es null (no debería), evita error
-        if (emp.getArea() == null) {
-            emp.setArea(new Area()); // o maneja el error apropiadamente
-        }
         
         model.addAttribute("employee", emp);
         model.addAttribute("areas", areaService.getAllAreas());
@@ -72,12 +69,15 @@ public String actualizar(@PathVariable Long id,
                          @RequestParam("nombre") String nombre,
                          @RequestParam(value = "apellido", required = false) String apellido,
                          @RequestParam(value = "area.id", required = false) Long areaId) {
-    Employee employee = employeeService.getEmployeeById(id);
+    // Bind input into a new object. Never mutate an OSIV-managed entity before
+    // the service transaction validates every referenced resource.
+    Employee employee = new Employee();
     employee.setName(nombre);
     employee.setApellido(apellido); // si tu entidad tiene apellido
     
     if (areaId != null) {
-        Area area = areaService.getAreaById(areaId);
+        Area area = new Area();
+        area.setId(areaId);
         employee.setArea(area);
     } else {
         employee.setArea(null);

@@ -6,8 +6,9 @@ import com.taskapp.task_scheduler.model.TaskType;
 import java.util.List;
 
 @Repository
-public interface TaskRepository extends JpaRepository<Task, Long> {
+public interface TaskRepository extends OwnedRepository<Task> {
     
     List<Task> findByType(TaskType type);
+    List<Task> findByOwner_IdAndType(Long ownerId, TaskType type);
     
 }

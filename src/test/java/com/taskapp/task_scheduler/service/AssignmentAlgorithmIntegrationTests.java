@@ -47,6 +47,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 })
 @ActiveProfiles("local")
 @Transactional
+@org.springframework.context.annotation.Import(AssignmentAlgorithmIntegrationTests.TestIdentity.class)
 class AssignmentAlgorithmIntegrationTests {
 
     @Autowired private AssignmentAlgorithm algorithm;
@@ -243,6 +244,7 @@ class AssignmentAlgorithmIntegrationTests {
         employee("Persona", area, true);
         Team team = team("Equipo", List.of(area), List.of(task("Tarea", TaskType.GENERAL)));
         Payroll previous = new Payroll();
+        previous.setOwner(owners.reference(owners.id()));
         previous.setTeam(team);
         previous.setStatus(PayrollStatus.ACTIVE);
         previous.setStartDate(LocalDate.now());
@@ -293,14 +295,29 @@ class AssignmentAlgorithmIntegrationTests {
         }
     }
 
+    @Autowired private com.taskapp.task_scheduler.security.OwnerAccess owners;
+
+    @org.springframework.boot.test.context.TestConfiguration(proxyBeanMethods = false)
+    static class TestIdentity {
+        @org.springframework.context.annotation.Bean
+        @org.springframework.context.annotation.Primary
+        com.taskapp.auth.CurrentUser testCurrentUser() {
+            return () -> java.util.Optional.of(new com.taskapp.auth.UserIdentity(
+                    new com.taskapp.auth.ExternalUserId("https://idp.example.test/", "algorithm-fixture"),
+                    "algorithm@example.test", true, "Algorithm fixture"));
+        }
+    }
+
     private Area area(String name) {
         Area area = new Area();
+        area.setOwner(owners.reference(owners.id()));
         area.setNombre(name);
         return areaRepository.save(area);
     }
 
     private Employee employee(String name, Area area, boolean active) {
         Employee employee = new Employee();
+        employee.setOwner(owners.reference(owners.id()));
         employee.setName(name);
         employee.setArea(area);
         employee.setActive(active);
@@ -309,6 +326,7 @@ class AssignmentAlgorithmIntegrationTests {
 
     private Task task(String name, TaskType type) {
         Task task = new Task();
+        task.setOwner(owners.reference(owners.id()));
         task.setName(name);
         task.setType(type);
         return taskRepository.save(task);
@@ -328,11 +346,13 @@ class AssignmentAlgorithmIntegrationTests {
 
     private Team team(String name, List<Area> areas, List<Task> tasks) {
         TaskGroup catalog = new TaskGroup();
+        catalog.setOwner(owners.reference(owners.id()));
         catalog.setName(name + " catálogo");
         catalog.setTasks(new ArrayList<>(tasks));
         catalog = taskGroupRepository.save(catalog);
 
         Team team = new Team();
+        team.setOwner(owners.reference(owners.id()));
         team.setName(name);
         team.setAreas(new ArrayList<>(areas));
         team.setTaskGroups(new ArrayList<>(List.of(catalog)));

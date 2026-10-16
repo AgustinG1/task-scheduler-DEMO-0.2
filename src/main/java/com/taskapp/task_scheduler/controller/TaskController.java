@@ -18,6 +18,11 @@ public class TaskController {
     private final TaskService taskService;
     private final AreaService areaService;
 
+    @InitBinder
+    void fields(org.springframework.web.bind.WebDataBinder binder) {
+        binder.setAllowedFields("name", "description", "type");
+    }
+
     // 1. Mostrar la página con la lista de tareas y el formulario de creación
     @GetMapping
     public String listar(Model model) {
@@ -33,12 +38,7 @@ public class TaskController {
     public String guardar(@ModelAttribute("nuevaTarea") Task task,
                           @RequestParam(required = false) Long areaId) {
         
-        Task savedTask = taskService.createTask(task);
-        
-        // Si es SPECIFIC y se seleccionó un área válida, crear el vínculo
-        if (task.getType() == TaskType.SPECIFIC && areaId != null) {
-            taskService.vincularArea(savedTask, areaId);
-        }
+        taskService.createTask(task, areaId);
         
         return "redirect:/tasks";
     }
@@ -59,7 +59,7 @@ public class TaskController {
     }
 
     // 5. Eliminar la tarea permanentemente
-    @GetMapping("/eliminar/{id}")
+    @PostMapping("/eliminar/{id}")
     public String eliminar(@PathVariable Long id) {
         taskService.deleteTask(id);
         return "redirect:/tasks";

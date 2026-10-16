@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{account/shell :: head('Verifica tu correo')}"></head>
+<body>
+<header th:replace="~{account/shell :: header}"></header>
+<main class="auth-layout">
+    <section class="intro">
+        <p class="eyebrow">Tu cuenta</p>
+        <h1>Verifica <span>tu correo.</span></h1>
+        <p class="intro-copy">Abre el mensaje de verificación que recibiste al registrarte. Después, cierra esta sesión y vuelve a entrar.</p>
+    </section>
+    <section class="auth-card" aria-labelledby="verification-title">
+        <h2 id="verification-title">Falta confirmar tu correo</h2>
+        <p class="card-copy">Revisa también la carpeta de spam. Tu cuenta necesita un correo verificado para continuar.</p>
+        <div class="actions">
+            <form th:action="@{/logout}" method="post"><button class="button" type="submit">Cerrar sesión</button></form>
+            <a class="button secondary" th:href="@{/}">Volver al inicio</a>
+        </div>
+    </section>
+</main>
+<footer th:replace="~{account/shell :: footer}"></footer>
+</body>
+</html>
